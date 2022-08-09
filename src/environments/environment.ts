@@ -3,7 +3,8 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  baseApiUrl: 'http://api.spuchifai.novit.com.ar/api/v1/Playlist'
 };
 
 /*

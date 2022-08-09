@@ -18,6 +18,10 @@
     "importHelpers": true,
     "target": "es2020",
     "module": "es2020",
+    "typeRoots": [
+      "node_modules/@types",
+      "node_modules/@angular/common/http"
+    ],
     "lib": [
       "es2020",
       "dom"
