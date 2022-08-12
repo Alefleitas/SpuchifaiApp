@@ -6,6 +6,8 @@ import { HomeComponent } from './pages/home/home.component';
 import { PlaylistListComponent } from './pages/playlist-list/playlist-list.component';
 import { PlaylistRoutingModule } from './playlist-routing.module';
 import { MaterialModule } from '../material/material.module';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 
 
@@ -16,10 +18,13 @@ import { MaterialModule } from '../material/material.module';
     PlaylistComponent,
     HomeComponent,
     PlaylistListComponent
+    
   ],
   imports: [
     PlaylistRoutingModule,
-    MaterialModule
+    MaterialModule,
+    FormsModule,
+    CommonModule
   ]
 })
 export class PlaylistsModule { }

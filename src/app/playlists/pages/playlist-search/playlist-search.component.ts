@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { Playlist } from '../../interfaces/playlist.interface';
+import { PlaylistService } from '../../services/playlist.service';
 
 @Component({
   selector: 'app-playlist-search',
@@ -6,9 +8,17 @@ import { Component, OnInit } from '@angular/core';
 })
 export class PlaylistSearchComponent implements OnInit {
 
-  constructor() { }
+  term: string = '';
+  playlists: Playlist[] = [];
+
+
+  constructor(private _playlistService: PlaylistService) { }
 
   ngOnInit(): void {
   }
 
+  onSearch() {
+    this._playlistService.getSuggestions(this.term)
+      .subscribe(res => this.playlists = res);
+  }
 }

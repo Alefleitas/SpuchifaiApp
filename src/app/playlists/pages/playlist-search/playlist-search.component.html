@@ -1,1 +1,26 @@
-<p>playlist-search works!</p>
+<div flxLayout="column">
+  <div>
+    <h1>Buscar Playlists</h1>
+    <mat-divider></mat-divider>
+    <br />
+  </div>
+  <div>
+    <mat-form-field class="example-full-width" appearance="fill">
+      <mat-label>Nombre</mat-label>
+      <input
+        type="text"
+        placeholder="Buscar playlist"
+        aria-label="Nombre"
+        [(ngModel)]="term"
+        matInput
+        [matAutocomplete]="auto"
+        (input)="onSearch()"
+      />
+      <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+        <mat-option *ngFor="let item of playlists" [value]="item">
+          {{ item.name }}
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
+  </div>
+</div>
