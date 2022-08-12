@@ -4,7 +4,8 @@
 
 export const environment = {
   production: false,
-  baseApiUrl: 'http://api.spuchifai.novit.com.ar/api/v1/Playlist'
+  baseApiUrl: 'http://api.spuchifai.novit.com.ar/api/v1'
+  // baseApiUrl: 'http://api.spuchifai.novit.com.ar/api/v2/Playlist'
 };
 
 /*

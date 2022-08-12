@@ -5,6 +5,7 @@ import { PlaylistComponent } from './pages/playlist/playlist.component';
 import { HomeComponent } from './pages/home/home.component';
 import { PlaylistListComponent } from './pages/playlist-list/playlist-list.component';
 import { PlaylistRoutingModule } from './playlist-routing.module';
+import { MaterialModule } from '../material/material.module';
 
 
 
@@ -17,7 +18,8 @@ import { PlaylistRoutingModule } from './playlist-routing.module';
     PlaylistListComponent
   ],
   imports: [
-    PlaylistRoutingModule
+    PlaylistRoutingModule,
+    MaterialModule
   ]
 })
 export class PlaylistsModule { }

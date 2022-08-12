@@ -1,1 +1,48 @@
-<p>playlist works!</p>
+<h1>{{ playlist.name }}</h1>
+<h3>{{ playlist.description }}</h3>
+<mat-divider></mat-divider>
+<br />
+<br />
+<h2 class="text-primary">Canciones</h2>
+<table mat-table [dataSource]="songs" class="mat-elevation-z8">
+  <!-- Name Column -->
+  <ng-container matColumnDef="name">
+    <th mat-header-cell *matHeaderCellDef>Nombre</th>
+    <td mat-cell *matCellDef="let element">{{ element.name }}</td>
+  </ng-container>
+
+  <!-- Artist Column -->
+  <ng-container matColumnDef="artist">
+    <th mat-header-cell *matHeaderCellDef>Artista</th>
+    <td mat-cell *matCellDef="let element">{{ element.artist }}</td>
+  </ng-container>
+
+  <!-- Albúm Column -->
+  <ng-container matColumnDef="album">
+    <th mat-header-cell *matHeaderCellDef>Albúm</th>
+    <td mat-cell *matCellDef="let element">{{ element.album }}</td>
+  </ng-container>
+
+  <!-- Albúm Column -->
+  <ng-container matColumnDef="date">
+    <th mat-header-cell *matHeaderCellDef>Fecha</th>
+    <td mat-cell *matCellDef="let element">{{ element.date }}</td>
+  </ng-container>
+  <!-- Action Column -->
+  <ng-container matColumnDef="action">
+    <th mat-header-cell *matHeaderCellDef>Acción</th>
+    <td mat-cell *matCellDef="let element">
+      <button
+        mat-button
+        color="primary"
+        [routerLink]="['/playlist', element.name]"
+      >
+        <mat-icon>visibility</mat-icon>
+      </button>
+     
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+</table>

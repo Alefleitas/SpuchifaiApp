@@ -1,12 +1,14 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Routes, RouterModule } from '@angular/router';
 import { PlaylistAddComponent } from './pages/playlist-add/playlist-add.component';
 import { PlaylistListComponent } from './pages/playlist-list/playlist-list.component';
+import { HomeComponent } from './pages/home/home.component';
+import { PlaylistComponent } from './pages/playlist/playlist.component';
 
 const routes: Routes = [
   {
     path: '',
+    component: HomeComponent,
     children: [
       {
         path: 'playlist-add',
@@ -15,10 +17,6 @@ const routes: Routes = [
       {
         path: 'playlist-list',
         component: PlaylistListComponent
-      },
-      {
-        path: 'playlist-add',
-        component: PlaylistAddComponent
       },
       {
         path: 'playlist-edit/:playlistName',
@@ -30,7 +28,7 @@ const routes: Routes = [
       },
       {
         path: ':playlistName',
-        component: PlaylistAddComponent
+        component: PlaylistComponent
       },
       {
         path: '**',
