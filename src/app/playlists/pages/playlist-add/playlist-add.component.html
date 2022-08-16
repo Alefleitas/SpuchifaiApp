@@ -1,26 +1,11 @@
-<h1>Nueva playlist</h1>
+<h1>{{ playlist.idPlaylist ? "Editar" : "Nueva" }} playlist</h1>
 <br />
 <div fxLayout="row" fxLayoutGap="40px" fxLayout.xs="column">
   <div fxFlex="50" fxLayout="column" fxLayout.xs="column">
     <mat-form-field fxFlex="100">
       <mat-label> Nombre </mat-label>
 
-      <input
-        *ngIf="!this.playlist.name"
-        matInput
-        type="text"
-        [ngModel]="playlist.name"
-        required
-      />
-      <input
-        *ngIf="this.playlist.name"
-        disabled
-        readonly
-        matInput
-        type="text"
-        [(ngModel)]="playlist.name"
-        required
-      />
+      <input matInput type="text" [(ngModel)]="this.playlist.name" required />
     </mat-form-field>
     <mat-form-field fxFlex="100" fxLayout.xs="column">
       <mat-label> Descripción </mat-label>
@@ -29,7 +14,18 @@
   </div>
 </div>
 <br />
-<button mat-raised-button color="primary" (click)="SaveForm()">
-  <mat-icon>edit</mat-icon>
-  Guardar
-</button>
+<div fxLayout>
+  <button mat-raised-button color="primary" (click)="SaveForm()">
+    <mat-icon>edit</mat-icon>
+    {{ playlist.idPlaylist ? "Actualizar" : "Crear" }}
+  </button>
+  <button
+    *ngIf="this.playlist.idPlaylist"
+    mat-raised-button
+    color="warn"
+    (click)="RemovePlaylist()"
+  >
+    <mat-icon>remove</mat-icon>
+    Borrar
+  </button>
+</div>

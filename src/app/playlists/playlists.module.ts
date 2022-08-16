@@ -8,6 +8,7 @@ import { PlaylistRoutingModule } from './playlist-routing.module';
 import { MaterialModule } from '../material/material.module';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { ConfirmComponent } from './components/confirm/confirm.component';
 
 
 
@@ -17,7 +18,8 @@ import { CommonModule } from '@angular/common';
     PlaylistSearchComponent,
     PlaylistComponent,
     HomeComponent,
-    PlaylistListComponent
+    PlaylistListComponent,
+    ConfirmComponent
     
   ],
   imports: [

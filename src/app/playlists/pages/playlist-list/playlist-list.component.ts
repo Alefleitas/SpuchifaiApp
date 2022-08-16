@@ -17,6 +17,8 @@ export class PlaylistListComponent implements OnInit {
       subscribe(res => {
         this.dataSource = res
       })
+      console.log(this.dataSource);
+      
   }
 
 }

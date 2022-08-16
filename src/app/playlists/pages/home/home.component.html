@@ -2,34 +2,33 @@
   <mat-icon>headphones</mat-icon>
   <span>Spuchifai</span>
   <span class="example-spacer"></span>
-  <button mat-button routerLink="/playlist/playlist-list"
-  >
+  <button mat-button routerLink="/playlist/playlist-list">
+    <mat-icon>list</mat-icon>
     Playlists
   </button>
-  <button mat-button routerLink="/playlist/playlist-search"
-  >
-  <mat-icon>search</mat-icon>
+  <button mat-button routerLink="/playlist/playlist-search">
+    <mat-icon>search</mat-icon>
     Buscar playlist
   </button>
-  <button mat-button routerLink="/playlist/playlist-add"
-  >
-  <mat-icon>playlist_add</mat-icon>
+  <button mat-button routerLink="/playlist/playlist-add">
+    <mat-icon>playlist_add</mat-icon>
     Nueva playlist
   </button>
-  <button mat-button routerLink="/playlist/playlist-add"
-  >
-  <mat-icon>note_add</mat-icon>
+  <button mat-button routerLink="/playlist/playlist-add">
+    <mat-icon>note_add</mat-icon>
     Nueva canción
   </button>
   <span class="spacer"></span>
+  <span class="text-warning">{{this.auth.usuario}}</span>
   <button
     mat-icon-button
-    class="example-icon"
+    matTooltip="Cerrar sesión"
     aria-label="Example icon-button with share icon"
+    (click)="logout()"
   >
     <mat-icon>logout</mat-icon>
   </button>
 </mat-toolbar>
 <div class="mx-5 my-5 margin-auto">
-    <router-outlet></router-outlet>
+  <router-outlet></router-outlet>
 </div>

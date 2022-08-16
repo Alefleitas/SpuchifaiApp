@@ -1,1 +1,42 @@
-<p>login works!</p>
+<mat-card>
+  <mat-card-title>Spuchifai | Ingreso</mat-card-title>
+  <br />
+  <mat-card-content fxLayout="column">
+    <!-- <form [formGroup]="form" (ngSubmit)="submit()"> -->
+    <!-- <p> -->
+    <mat-form-field>
+      <input
+        type="text"
+        matInput
+        [(ngModel)]="this.user.usuario"
+        placeholder="Usuario"
+        required
+      />
+    </mat-form-field>
+    <!-- </p> -->
+
+    <p>
+      <mat-form-field>
+        <input
+          type="password"
+          matInput
+          [(ngModel)]="this.password"
+          placeholder="Contraseña"
+          required
+        />
+      </mat-form-field>
+    </p>
+
+    <!-- <p *ngIf="error" class="error">
+    {{ error }}
+  </p> -->
+
+    <div class="button">
+      <button type="submit" mat-raised-button color="primary" (click)="login()">
+        Ingresar
+      </button>
+    </div>
+
+    <!-- </form> -->
+  </mat-card-content>
+</mat-card>
