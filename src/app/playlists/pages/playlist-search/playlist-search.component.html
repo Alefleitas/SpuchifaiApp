@@ -1,26 +1,53 @@
 <div flxLayout="column">
   <div>
-    <h1>Buscar Playlists</h1>
+    <h1>Buscador de playlists</h1>
     <mat-divider></mat-divider>
     <br />
   </div>
-  <div>
+  <div fxLayout="column">
+    <h3>Buscador</h3>
     <mat-form-field class="example-full-width" appearance="fill">
       <mat-label>Nombre</mat-label>
       <input
         type="text"
         placeholder="Buscar playlist"
         aria-label="Nombre"
-        [(ngModel)]="term"
         matInput
+        [(ngModel)]="term"
         [matAutocomplete]="auto"
         (input)="onSearch()"
       />
-      <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
-        <mat-option *ngFor="let item of playlists" [value]="item">
-          {{ item.name }}
+      <mat-autocomplete
+        autoActiveFirstOption
+        #auto="matAutocomplete"
+        (optionSelected)="selectedOption($event)"
+      >
+        <mat-option *ngFor="let playlist of playlists" [value]="playlist">
+          {{ playlist.name }}
+        </mat-option>
+        <mat-option value="" *ngIf="playlists.length === 0 && term">
+          No se encontró superheroe para el termino : {{ term }}
         </mat-option>
       </mat-autocomplete>
     </mat-form-field>
+    <mat-divider></mat-divider>
+    <br />
+    <mat-card *ngIf="selectedPlaylist">
+      <mat-card-header>
+        <mat-card-title>{{ selectedPlaylist.name }}</mat-card-title>
+        <mat-card-subtitle>{{
+          selectedPlaylist.description
+        }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-actions>
+        <button
+          mat-raised-button
+          color="primary"
+          [routerLink]="['/playlist', selectedPlaylist.name]"
+        >
+          Ver detalle
+        </button>
+      </mat-card-actions>
+    </mat-card>
   </div>
 </div>

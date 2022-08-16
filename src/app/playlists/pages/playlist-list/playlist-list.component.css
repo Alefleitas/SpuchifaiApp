@@ -5,3 +5,7 @@ table {
 th{
     width: 30%;
 }
+
+button{
+  margin: 0px 5px;
+}

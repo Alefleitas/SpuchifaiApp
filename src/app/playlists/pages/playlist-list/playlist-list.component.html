@@ -1,7 +1,7 @@
 <h1>Listas de reproducción</h1>
 <mat-divider></mat-divider>
 <br />
-<button mat-raised-button color="primary">
+<button mat-raised-button color="primary" routerLink="/playlist/playlist-add">
   <mat-icon>add</mat-icon>
   <span>Agregar nueva playlist</span>
 </button>
@@ -22,14 +22,35 @@
   </ng-container>
   <!-- Action Column -->
   <ng-container matColumnDef="action">
-    <th mat-header-cell *matHeaderCellDef>Acción</th>
-    <td mat-cell *matCellDef="let element">
-      <button mat-button color="primary" [routerLink]="['/playlist', element.name]">
+    <th mat-header-cell *matHeaderCellDef style="text-align: center;">Acción</th>
+    <td mat-cell *matCellDef="let element" style="text-align: center;">
+      <button
+        mat-mini-fab
+        color="info"
+        matTooltip="Editar la playlist"
+        aria-label="Editar la playlist"
+        [routerLink]="['/playlist/playlist-edit', element.name]"
+      >
+        <mat-icon>edit</mat-icon>
+      </button>
+      <button
+        mat-mini-fab
+        color="primary"
+        matTooltip="Ver detalle"
+        aria-label="Ver detalle"
+        [routerLink]="['/playlist', element.name]"
+      >
         <mat-icon>visibility</mat-icon>
       </button>
-      <button mat-button color="warn">
-        <mat-icon>delete</mat-icon>
-      </button>
+      
+
+        <button mat-mini-fab  color="warn"
+                            matTooltip="Eliminar playlist"
+                            aria-label="Eliminar playlist"
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
+     
     </td>
   </ng-container>
 

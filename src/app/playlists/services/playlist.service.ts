@@ -23,7 +23,15 @@ export class PlaylistService {
   }
 
   getSuggestions(term: string): Observable<Playlist[]> {
-    return this.http.get<Playlist[]>(`${this.apiUrl}/Playlist?q=${term}`)
+    return this.http.get<Playlist[]>(`${this.apiUrl}/Playlist?q=${term}&_limit=5`)
 
+  }
+
+  postAddPlaylist(playlist: Playlist): Observable<Playlist> {
+    return this.http.post<Playlist>(`${this.apiUrl}/Playlist`, playlist)
+  }
+
+  putUpdatePlaylist(playlist: Playlist): Observable<Playlist> {
+    return this.http.put<Playlist>(`${this.apiUrl}/Playlist/${playlist.name}`, playlist)
   }
 }

@@ -1,1 +1,35 @@
-<p>playlist-add works!</p>
+<h1>Nueva playlist</h1>
+<br />
+<div fxLayout="row" fxLayoutGap="40px" fxLayout.xs="column">
+  <div fxFlex="50" fxLayout="column" fxLayout.xs="column">
+    <mat-form-field fxFlex="100">
+      <mat-label> Nombre </mat-label>
+
+      <input
+        *ngIf="!this.playlist.name"
+        matInput
+        type="text"
+        [ngModel]="playlist.name"
+        required
+      />
+      <input
+        *ngIf="this.playlist.name"
+        disabled
+        readonly
+        matInput
+        type="text"
+        [(ngModel)]="playlist.name"
+        required
+      />
+    </mat-form-field>
+    <mat-form-field fxFlex="100" fxLayout.xs="column">
+      <mat-label> Descripción </mat-label>
+      <input matInput type="text" [(ngModel)]="playlist.description" required />
+    </mat-form-field>
+  </div>
+</div>
+<br />
+<button mat-raised-button color="primary" (click)="SaveForm()">
+  <mat-icon>edit</mat-icon>
+  Guardar
+</button>
