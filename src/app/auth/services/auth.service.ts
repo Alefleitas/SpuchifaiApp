@@ -49,12 +49,12 @@ export class AuthService {
     }).pipe(
       tap(resp => {
         
-        // tap, antes de dirigirse al metodo que lo invoca, realiza la logica en el tap
-        this._auth = auth;
-        this._auth.token = resp;
-
+          this._auth = auth;
+          this._auth.token = resp;
+        
       }),
       tap(resp => localStorage.setItem('Auth', JSON.stringify(this._auth)))
+      // tap, antes de dirigirse al metodo que lo invoca, realiza la logica en el tap
     )
   }
 
