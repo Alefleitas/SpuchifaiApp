@@ -69,20 +69,6 @@ export class SongAddComponent implements OnInit {
         this.form.get('album')?.setValue(this.song.album);
       });
 
-
-    // this.activatedRoute.params
-    //   .pipe(
-    //     switchMap(({ songName }) =>
-    //       this._playlistService.getSongById(this.playlist.name, songName)
-    //     )
-    //   ).subscribe(song => {
-    //     console.log('suscribe de song');
-
-    //     this.song = song
-    //     this.form.get('name')?.setValue(this.song.name);
-    //     this.form.get('artist')?.setValue(this.song.artist);
-    //     this.form.get('album')?.setValue(this.song.album);
-    //   })
   }
 
   SaveForm(form: FormGroup): void {
