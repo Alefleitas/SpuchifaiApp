@@ -9,6 +9,7 @@ import { MaterialModule } from '../material/material.module';
 import { CommonModule } from '@angular/common';
 import { ConfirmComponent } from './components/confirm/confirm.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { SongAddComponent } from './pages/song-add/song-add.component';
 
 
 
@@ -19,7 +20,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     PlaylistComponent,
     HomeComponent,
     PlaylistListComponent,
-    ConfirmComponent
+    ConfirmComponent,
+    SongAddComponent
 
   ],
   imports: [

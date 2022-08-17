@@ -38,7 +38,6 @@ export class PlaylistAddComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    // console.log(this.activatedRoute.params);
 
     this.form = this.fb.group({
       name: [this.playlist.name, [Validators.required, Validators.minLength(this.minLengthForName)]],
@@ -58,8 +57,10 @@ export class PlaylistAddComponent implements OnInit {
 
   SaveForm(form: FormGroup): void {
 
-    this.playlist.name = this.form.get('name')?.value;
-    this.playlist.description = this.form.get('description')?.value;
+    if(this.playlist.description === form.get('description')?.value) return;
+
+    this.playlist.name = form.get('name')?.value;
+    this.playlist.description = form.get('description')?.value;
 
 
     console.log('valor:', this.playlist.name);
@@ -67,7 +68,7 @@ export class PlaylistAddComponent implements OnInit {
       return;
     }
 
-    if (this.playlist.idPlaylist !== 0) {
+    if (this.playlist.idPlaylist !== 0 ) {
       console.log(this.playlist.idPlaylist);
 
       this._playlistService.putUpdatePlaylist(this.playlist)
@@ -85,8 +86,8 @@ export class PlaylistAddComponent implements OnInit {
 
   }
 
-  RemovePlaylist() {
-    console.log(this.playlist);
+  RemovePlaylist():void {
+    console.log('Abriendo modal..');
 
     const dialog = this.dialog.open(ConfirmComponent, {
       width: '300px',
@@ -96,7 +97,7 @@ export class PlaylistAddComponent implements OnInit {
     dialog.afterClosed()
       .subscribe((result) => {
 
-        console.log('llego aca?');
+        console.log('Modal cerrando..?');
 
         if (result) {
 

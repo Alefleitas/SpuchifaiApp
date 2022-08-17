@@ -1,0 +1,71 @@
+<h1>{{ this.song.idSong! > 0 ? "Editar" : "Nueva" }} canción</h1>
+<br />
+<div fxLayout="row" fxLayoutGap="40px" fxLayout.xs="column">
+  <div fxFlex="50">
+    <form
+      [formGroup]="form"
+      (ngSubmit)="SaveForm(form)"
+      fxLayout="column"
+      fxLayout.xs="column"
+    >
+      <mat-form-field fxFlex="100" appearance="standard">
+        <mat-label> Nombre </mat-label>
+        <input
+          [readonly]="this.song.idSong !== 0 ? true : false"
+          matInput
+          type="text"
+          formControlName="name"
+          required
+          readonly
+        />
+        <mat-error *ngIf="form.controls['name'].errors?.['required']">
+          El nombre es requerido
+        </mat-error>
+        <mat-error *ngIf="form.controls['name'].errors?.['minlength']">
+          Por favor ingrese al menos {{ this.minLengthForName }} caracteres
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field fxFlex="100" fxLayout.xs="column">
+        <mat-label> Artista </mat-label>
+        <input matInput type="text" formControlName="artist" required />
+        <mat-error *ngIf="form.controls['artist'].errors?.['required']">
+          El artista es requerido
+        </mat-error>
+        <mat-error *ngIf="form.controls['artist'].errors?.['minlength']">
+          Por favor ingrese al menos {{ this.minLengthForName }} caracteres
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field fxFlex="100" fxLayout.xs="column">
+        <mat-label> Album </mat-label>
+        <input matInput type="text" formControlName="album" required />
+        <mat-error *ngIf="form.controls['album'].errors?.['required']">
+          El album es requerido
+        </mat-error>
+        <mat-error *ngIf="form.controls['album'].errors?.['minlength']">
+          Por favor ingrese al menos {{ this.minLengthForName }} caracteres
+        </mat-error>
+      </mat-form-field>
+      <br />
+      <div fxLayout>
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          [disabled]="!form.valid"
+        >
+          <mat-icon>edit</mat-icon>
+          {{ this.song.idSong ? "Actualizar" : "Crear" }}
+        </button>
+        <button
+          *ngIf="this.song.idSong"
+          mat-raised-button
+          color="warn"
+          (click)="RemoveSong()"
+        >
+          <mat-icon>remove</mat-icon>
+          Borrar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

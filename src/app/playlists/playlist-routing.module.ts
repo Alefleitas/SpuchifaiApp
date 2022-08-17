@@ -5,6 +5,7 @@ import { PlaylistListComponent } from './pages/playlist-list/playlist-list.compo
 import { HomeComponent } from './pages/home/home.component';
 import { PlaylistComponent } from './pages/playlist/playlist.component';
 import { PlaylistSearchComponent } from './pages/playlist-search/playlist-search.component';
+import { SongAddComponent } from './pages/song-add/song-add.component';
 
 const routes: Routes = [
   {
@@ -30,6 +31,14 @@ const routes: Routes = [
       {
         path: ':playlistName',
         component: PlaylistComponent
+      },
+      {
+        path: ':playlistName/song-add',
+        component: SongAddComponent
+      },
+      {
+        path: ':playlistName/song-edit/:songName',
+        component: SongAddComponent
       },
       {
         path: '**',

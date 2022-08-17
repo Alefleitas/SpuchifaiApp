@@ -13,16 +13,24 @@ import { switchMap } from 'rxjs';
 })
 export class PlaylistComponent implements OnInit {
 
-  playlist!: Playlist;
+  playlist: Playlist = {
+    idPlaylist: 0,
+    name: '',
+    description: '',
+    idSongs: []
+  };
   songs: IDSong[] = [];
-  displayedColumns: string[] = ['name','artist', 'album', 'date','action']
+  displayedColumns: string[] = ['name', 'artist', 'album', 'date', 'action']
   constructor(
     private activatedRoute: ActivatedRoute,
     private _playlistService: PlaylistService) { }
 
   ngOnInit(): void {
 
-    console.log(this.activatedRoute.params);
+    console.log(this.activatedRoute.params
+      .subscribe(res => console.log(res)
+      )
+    );
 
 
     this.activatedRoute.params

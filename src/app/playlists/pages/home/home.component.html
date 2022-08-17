@@ -1,6 +1,6 @@
-<mat-toolbar color="primary">
-  <mat-icon>headphones</mat-icon>
-  <span>Spuchifai</span>
+<mat-toolbar class="bg-dark text-white">
+  <mat-icon class="text-success">headphones</mat-icon>
+  <span class="text-success">Spuchifai</span>
   <span class="example-spacer"></span>
   <button mat-button routerLink="/playlist/playlist-list">
     <mat-icon>list</mat-icon>
@@ -10,16 +10,16 @@
     <mat-icon>search</mat-icon>
     Buscar playlist
   </button>
-  <button mat-button routerLink="/playlist/playlist-add">
+  <button mat-button  routerLink="/playlist/playlist-add">
     <mat-icon>playlist_add</mat-icon>
     Nueva playlist
   </button>
-  <button mat-button routerLink="/playlist/playlist-add">
+  <!-- <button mat-button routerLink="/playlist/playlist-add">
     <mat-icon>note_add</mat-icon>
     Nueva canción
-  </button>
+  </button> -->
   <span class="spacer"></span>
-  <span class="text-warning">{{this.auth.usuario}}</span>
+  <span class="text-warning">{{ this.auth.usuario }}</span>
   <button
     mat-icon-button
     matTooltip="Cerrar sesión"
