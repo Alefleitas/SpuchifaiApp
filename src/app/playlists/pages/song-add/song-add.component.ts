@@ -57,7 +57,6 @@ export class SongAddComponent implements OnInit {
       )
       .subscribe(resp => this.playlist = resp)
 
-    console.log('llega a los params');
 
     this.activatedRoute.params
       .pipe(
@@ -80,21 +79,16 @@ export class SongAddComponent implements OnInit {
     this.song.artist = form.get('artist')?.value;
     this.song.album = form.get('album')?.value;
 
-    console.log('valor:', this.song.name);
     if (this.song.name.trim().length === 0) {
       return;
     }
 
     if (this.song.idSong! > 0) {
-      console.log(this.song.idSong);
 
       this._playlistService.putUpdateSong(this.playlist.name, this.song)
         .subscribe(playlist => this.showSnackbar("Playlist actualizada"))
 
     } else {
-      console.log(this.playlist.name);
-      console.log(this.song);
-
       this._playlistService.postAddSong(this.playlist.name, this.song)
         .subscribe(playlist => {
           this.router.navigate(['/playlist', this.playlist.name])
@@ -105,7 +99,6 @@ export class SongAddComponent implements OnInit {
   }
 
   RemoveSong() {
-    console.log(this.playlist);
 
     const dialog = this.dialog.open(ConfirmComponent, {
       width: '300px',
@@ -115,7 +108,6 @@ export class SongAddComponent implements OnInit {
     dialog.afterClosed()
       .subscribe((result) => {
 
-        console.log('llego aca?');
 
         if (result) {
 

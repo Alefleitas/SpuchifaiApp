@@ -63,13 +63,11 @@ export class PlaylistAddComponent implements OnInit {
     this.playlist.description = form.get('description')?.value;
 
 
-    console.log('valor:', this.playlist.name);
     if (this.playlist.name.trim().length === 0) {
       return;
     }
 
     if (this.playlist.idPlaylist !== 0 ) {
-      console.log(this.playlist.idPlaylist);
 
       this._playlistService.putUpdatePlaylist(this.playlist)
         .subscribe(playlist => this.showSnackbar("Playlist actualizada"))
@@ -87,7 +85,6 @@ export class PlaylistAddComponent implements OnInit {
   }
 
   RemovePlaylist():void {
-    console.log('Abriendo modal..');
 
     const dialog = this.dialog.open(ConfirmComponent, {
       width: '300px',
@@ -96,9 +93,6 @@ export class PlaylistAddComponent implements OnInit {
 
     dialog.afterClosed()
       .subscribe((result) => {
-
-        console.log('Modal cerrando..?');
-
         if (result) {
 
           this._playlistService.deletePlaylist(this.playlist.name)

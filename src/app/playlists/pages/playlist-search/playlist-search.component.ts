@@ -36,7 +36,6 @@ export class PlaylistSearchComponent implements OnInit {
     this._playlistService.getPlaylistById(playlist.name)
       .subscribe(playlist => this.selectedPlaylist = playlist);
 
-      console.log(this.selectedPlaylist);
       
   }
 }
