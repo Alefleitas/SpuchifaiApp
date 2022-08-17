@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { Auth } from '../../interfaces/auth.interface';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-login',
@@ -11,7 +12,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 })
 export class LoginComponent {
 
-  password: string = '';
+
+  form!: FormGroup
+  minLengthForName: number = 5;
 
   user: Auth = {
     usuario: '',
@@ -22,12 +25,25 @@ export class LoginComponent {
     private router: Router,
     private _authService: AuthService,
     private snackBar: MatSnackBar,
+    private readonly fb: FormBuilder
   ) { }
 
-  login() {
-    console.log(this._authService.postLogin(this.user));
+  ngOnInit(): void {
+    // console.log(this.activatedRoute.params);
 
-    this.user.contraseña = this.password;
+    this.form = this.fb.group({
+      usuario: [this.user.usuario, [Validators.required]],
+      contraseña: [this.user.contraseña, [Validators.required]]
+    });
+
+
+  }
+
+
+  login(form: FormGroup): void {
+    this.user.usuario = this.form.get('usuario')?.value;
+    this.user.contraseña = this.form.get('contraseña')?.value;
+    
     this._authService.postLogin(this.user)
       .subscribe(resp => {
         console.log(resp);

@@ -6,6 +6,8 @@ import { switchMap } from 'rxjs/operators'
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmComponent } from '../../components/confirm/confirm.component';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+
 
 @Component({
   selector: 'app-playlist-add',
@@ -15,6 +17,9 @@ import { ConfirmComponent } from '../../components/confirm/confirm.component';
   }`]
 })
 export class PlaylistAddComponent implements OnInit {
+
+  form!: FormGroup
+  minLengthForName: number = 5;
 
   playlist: Playlist = {
     name: '',
@@ -28,23 +33,35 @@ export class PlaylistAddComponent implements OnInit {
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
     private activatedRoute: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private readonly fb: FormBuilder
   ) { }
 
   ngOnInit(): void {
     // console.log(this.activatedRoute.params);
 
+    this.form = this.fb.group({
+      name: [this.playlist.name, [Validators.required, Validators.minLength(this.minLengthForName)]],
+      description: [this.playlist.description, [Validators.required, Validators.minLength(this.minLengthForName)]]
+    });
+
     this.activatedRoute.params
       .pipe(
         switchMap(({ playlistName }) => this._playlistService.getPlaylistById(playlistName))
       )
-      .subscribe(playlist => this.playlist = playlist)
-      
-      console.log(this.playlist.idPlaylist);
-      
+      .subscribe(playlist => {
+        this.playlist = playlist;
+        this.form.get('name')?.setValue(playlist.name);
+        this.form.get('description')?.setValue(playlist.description);
+      })
   }
 
-  SaveForm() {
+  SaveForm(form: FormGroup): void {
+
+    this.playlist.name = this.form.get('name')?.value;
+    this.playlist.description = this.form.get('description')?.value;
+
+
     console.log('valor:', this.playlist.name);
     if (this.playlist.name.trim().length === 0) {
       return;
@@ -52,7 +69,7 @@ export class PlaylistAddComponent implements OnInit {
 
     if (this.playlist.idPlaylist !== 0) {
       console.log(this.playlist.idPlaylist);
-      
+
       this._playlistService.putUpdatePlaylist(this.playlist)
         .subscribe(playlist => this.showSnackbar("Playlist actualizada"))
 

@@ -1,31 +1,61 @@
-<h1>{{ playlist.idPlaylist ? "Editar" : "Nueva" }} playlist</h1>
+<h1>{{ this.playlist.idPlaylist > 0 ? "Editar" : "Nueva" }} playlist</h1>
 <br />
 <div fxLayout="row" fxLayoutGap="40px" fxLayout.xs="column">
-  <div fxFlex="50" fxLayout="column" fxLayout.xs="column">
-    <mat-form-field fxFlex="100">
-      <mat-label> Nombre </mat-label>
-
-      <input matInput type="text" [(ngModel)]="this.playlist.name" required />
-    </mat-form-field>
-    <mat-form-field fxFlex="100" fxLayout.xs="column">
-      <mat-label> Descripción </mat-label>
-      <input matInput type="text" [(ngModel)]="playlist.description" required />
-    </mat-form-field>
+  <div fxFlex="50">
+    <form
+      [formGroup]="form"
+      (ngSubmit)="SaveForm(form)"
+      fxLayout="column"
+      fxLayout.xs="column"
+    >
+      <mat-form-field fxFlex="100" appearance="standard">
+        <mat-label> Nombre </mat-label>
+        <input
+          [readonly]="this.playlist.idPlaylist !== 0 ? true : false"
+          matInput
+          type="text"
+          formControlName="name"
+          required
+          readonly
+        />
+        <mat-error *ngIf="form.controls['name'].errors?.['required']">
+          El nombre es requerido
+        </mat-error>
+        <mat-error *ngIf="form.controls['name'].errors?.['minlength']">
+          Por favor ingrese al menos {{ this.minLengthForName }} caracteres
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field fxFlex="100" fxLayout.xs="column">
+        <mat-label> Descripción </mat-label>
+        <input matInput type="text" formControlName="description" required />
+        <mat-error *ngIf="form.controls['description'].errors?.['required']">
+          La descripcion es requerido
+        </mat-error>
+        <mat-error *ngIf="form.controls['description'].errors?.['minlength']">
+          Por favor ingrese al menos {{ this.minLengthForName }} caracteres
+        </mat-error>
+      </mat-form-field>
+      <br />
+      <div fxLayout>
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          [disabled]="!form.valid"
+        >
+          <mat-icon>edit</mat-icon>
+          {{ playlist.idPlaylist ? "Actualizar" : "Crear" }}
+        </button>
+        <button
+          *ngIf="this.playlist.idPlaylist"
+          mat-raised-button
+          color="warn"
+          (click)="RemovePlaylist()"
+        >
+          <mat-icon>remove</mat-icon>
+          Borrar
+        </button>
+      </div>
+    </form>
   </div>
-</div>
-<br />
-<div fxLayout>
-  <button mat-raised-button color="primary" (click)="SaveForm()">
-    <mat-icon>edit</mat-icon>
-    {{ playlist.idPlaylist ? "Actualizar" : "Crear" }}
-  </button>
-  <button
-    *ngIf="this.playlist.idPlaylist"
-    mat-raised-button
-    color="warn"
-    (click)="RemovePlaylist()"
-  >
-    <mat-icon>remove</mat-icon>
-    Borrar
-  </button>
 </div>

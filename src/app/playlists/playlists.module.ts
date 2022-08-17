@@ -6,9 +6,9 @@ import { HomeComponent } from './pages/home/home.component';
 import { PlaylistListComponent } from './pages/playlist-list/playlist-list.component';
 import { PlaylistRoutingModule } from './playlist-routing.module';
 import { MaterialModule } from '../material/material.module';
-import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ConfirmComponent } from './components/confirm/confirm.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 
 
@@ -20,12 +20,13 @@ import { ConfirmComponent } from './components/confirm/confirm.component';
     HomeComponent,
     PlaylistListComponent,
     ConfirmComponent
-    
+
   ],
   imports: [
     PlaylistRoutingModule,
     MaterialModule,
     FormsModule,
+    ReactiveFormsModule,
     CommonModule
   ]
 })
