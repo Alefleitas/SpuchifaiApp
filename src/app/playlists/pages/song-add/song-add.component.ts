@@ -75,7 +75,7 @@ export class SongAddComponent implements OnInit {
 
   SaveForm(form: FormGroup): void {
 
-    if (this.song.artist === form.get('artist')?.value ||
+    if (this.song.artist === form.get('artist')?.value &&
       this.song.album === form.get('album')?.value) return;
 
     this.song.name = form.get('name')?.value;
