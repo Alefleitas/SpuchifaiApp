@@ -57,15 +57,18 @@ export class SongAddComponent implements OnInit {
       )
       .subscribe(resp => this.playlist = resp)
 
-
     this.activatedRoute.params
       .pipe(
         switchMap(({ playlistName, songName }) => this._playlistService.getSongById(playlistName, songName)))
       .subscribe(resp => {
-        this.song = resp;
-        this.form.get('name')?.setValue(this.song.name);
-        this.form.get('artist')?.setValue(this.song.artist);
-        this.form.get('album')?.setValue(this.song.album);
+
+        if (resp) {
+
+          this.song = resp;
+          this.form.get('name')?.setValue(this.song.name);
+          this.form.get('artist')?.setValue(this.song.artist);
+          this.form.get('album')?.setValue(this.song.album);
+        }
       });
 
   }
