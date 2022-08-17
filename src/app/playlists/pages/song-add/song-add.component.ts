@@ -40,7 +40,6 @@ export class SongAddComponent implements OnInit {
 
   ngOnInit(): void {
 
-    console.log(this.activatedRoute.params);
 
 
     this.form = this.fb.group({
@@ -49,6 +48,8 @@ export class SongAddComponent implements OnInit {
       album: [this.song.album, [Validators.required, Validators.minLength(this.minLengthForName)]]
     });
 
+
+    //
     this.activatedRoute.params
       .pipe(
         switchMap(({ playlistName }) =>
