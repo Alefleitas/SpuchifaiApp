@@ -24,8 +24,6 @@ jobs:
         uses: sonarsource/sonarqube-scan-action@master
         with:
           args: -X
-      - name: SonarQube Show Results
-        run: sonar-scanner show
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
