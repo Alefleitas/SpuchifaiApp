@@ -34,6 +34,9 @@ jobs:
             -Dsonar.sources=src
             -Dsonar.host.url=https://sonarqube.example.com
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
       # Check the Quality Gate status.
       - name: SonarQube Quality Gate check
