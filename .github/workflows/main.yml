@@ -33,9 +33,11 @@ jobs:
             -Dsonar.scm.disabled=true
             -Dsonar.analysis.mode=preview
             -Dsonar.issuesReport.console.enable=true
+            -X  # Enable full debug logging
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
 
       - name: Get SonarQube Quality Gate Status
         id: sonarqube_quality_gate
