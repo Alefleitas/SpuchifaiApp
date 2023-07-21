@@ -33,7 +33,7 @@ jobs:
             -Dsonar.scm.disabled=true
             -Dsonar.analysis.mode=preview
             -Dsonar.issuesReport.console.enable=true
-            -X  # Enable full debug logging
+            -X
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
