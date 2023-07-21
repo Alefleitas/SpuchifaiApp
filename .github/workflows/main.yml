@@ -15,7 +15,6 @@ jobs:
         uses: actions/checkout@v2
         with: 
           fetch-depth: 0
-
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
@@ -25,28 +24,19 @@ jobs:
         run: npm install
       
       - name: Run SonarQube Scan
-        id: sonarqube_scan
         uses: sonarsource/sonarqube-scan-action@master
         with:
           args: >
             -Dsonar.cpd.exclusions=**
             -Dsonar.scm.disabled=true
-            -Dsonar.analysis.mode=preview
-            -Dsonar.issuesReport.console.enable=true
             -X
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-
-
+ 
       - name: Get SonarQube Quality Gate Status
-        id: sonarqube_quality_gate
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           curl -X GET -u "${SONAR_TOKEN}": -o quality-gate.json '${{ secrets.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=Spuchifai'
           cat quality-gate.json
-          
-      - name: Show Analysis Details
-        run: |
-          cat ${{ steps.sonarqube_scan.outputs.report_paths }}/issues-report-task.txt
