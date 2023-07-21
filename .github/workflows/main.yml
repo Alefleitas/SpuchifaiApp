@@ -4,7 +4,7 @@ on: push
 jobs:
 
   sonarqube-analysis:
-    name: SonarQube Analysis
+    name: SonarQube Scan
     runs-on: ubuntu-latest
 
     steps:
@@ -20,6 +20,10 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run SonarQube analysis
-        run: sonar-scanner
+      - name: Run SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      
 
