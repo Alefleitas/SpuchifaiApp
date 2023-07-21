@@ -19,14 +19,23 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-
+      
+      - name: Delete SonarQube Cache
+        env:
+          SONAR_PROJECT_KEY: Spuchifai
+        run: |
+          curl -X POST -u "${{ secrets.SONAR_TOKEN }}": 'http://${{ secrets.SONAR_HOST_URL }}/api/caches/delete?keys=Spuchifai'
+          
       - name: Run SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
         with:
           args: -X
+      - name: SonarQube Show Results
+        run: sonar-scanner show
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      
           
      
 
