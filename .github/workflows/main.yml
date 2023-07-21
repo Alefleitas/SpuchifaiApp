@@ -24,7 +24,7 @@ jobs:
         env:
           SONAR_PROJECT_KEY: Spuchifai
         run: |
-          curl -X POST -u "${{ secrets.SONAR_TOKEN }}": '${{ secrets.SONAR_HOST_URL }}/api/caches/delete?keys=Spuchifai'
+          curl -X POST -u "${{ secrets.SONAR_TOKEN }}": '${{ secrets.SONAR_HOST_URL }}api/caches/delete?keys=Spuchifai'
           
       - name: Run SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
