@@ -28,34 +28,35 @@ jobs:
           curl -X GET -u "${SONAR_TOKEN}": -o quality-gate.json '${{ secrets.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=Spuchifai'
           echo "::set-output name=status::$(cat quality-gate.json)"
 
+      - name: Check SonarQube Quality Gate Status
+        run: |
+          status=$(fromJson(steps.sonarqube_status.outputs.status).projectStatus.status)
+          if [[ "$status" == "ERROR" ]]; then
+            echo "SonarQube Quality Gate status is ERROR. Blocking the pull request."
+            gh pr lock ${{ github.event.number }} --reason "SonarQube Quality Gate status is ERROR."
+            exit 1
+          fi
+
       - name: Comment PR
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
-            Sonarqube Quality Gate | Project Status:
-            ```
-            ${{ steps.sonarqube_status.outputs.status }}
-            ```
-            Project Status: ${{ steps.sonarqube_status.outputs.status.projectStatus.status }}
-            Conditions:
-              - Metric: new_reliability_rating
-                Status: ${{ steps.sonarqube_status.outputs.status.projectStatus.conditions[0].status }}
-                Error Threshold: ${{ steps.sonarqube_status.outputs.status.projectStatus.conditions[0].errorThreshold }}
-                Actual Value: ${{ steps.sonarqube_status.outputs.status.projectStatus.conditions[0].actualValue }}
-              - Metric: new_security_rating
-                Status: ${{ steps.sonarqube_status.outputs.status.projectStatus.conditions[1].status }}
-                Error Threshold: ${{ steps.sonarqube_status.outputs.status.projectStatus.conditions[1].errorThreshold }}
-                Actual Value: ${{ steps.sonarqube_status.outputs.status.projectStatus.conditions[1].actualValue }}
-              - Metric: new_maintainability_rating
-                Status: ${{ steps.sonarqube_status.outputs.status.projectStatus.conditions[2].status }}
-                Error Threshold: ${{ steps.sonarqube_status.outputs.status.projectStatus.conditions[2].errorThreshold }}
-                Actual Value: ${{ steps.sonarqube_status.outputs.status.projectStatus.conditions[2].actualValue }}
-              - Metric: new_duplicated_lines_density
-                Status: ${{ steps.sonarqube_status.outputs.status.projectStatus.conditions[3].status }}
-                Error Threshold: ${{ steps.sonarqube_status.outputs.status.projectStatus.conditions[3].errorThreshold }}
-                Actual Value: ${{ steps.sonarqube_status.outputs.status.projectStatus.conditions[3].actualValue }}
-            Ignored Conditions: ${{ steps.sonarqube_status.outputs.status.projectStatus.ignoredConditions }}
-            Period:
-              Mode: ${{ steps.sonarqube_status.outputs.status.projectStatus.period.mode }}
-              Date: ${{ steps.sonarqube_status.outputs.status.projectStatus.period.date }}
-            Cayc Status: ${{ steps.sonarqube_status.outputs.status.projectStatus.caycStatus }}
+            Estado del Análisis de SonarQube: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
+            Condiciones:
+              - Métrica: Nuevo Índice de Fiabilidad
+                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[0].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
+                Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[0].errorThreshold }} (Cuanto menor es mejor)
+                Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[0].actualValue }}
+              - Métrica: Nuevo Índice de Seguridad
+                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[1].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
+                Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[1].errorThreshold }} (Cuanto menor es mejor)
+                Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[1].actualValue }}
+              - Métrica: Nuevo Índice de Mantenibilidad
+                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[2].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
+                Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[2].errorThreshold }} (Cuanto menor es mejor)
+                Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[2].actualValue }}
+              - Métrica: Nueva Densidad de Líneas Duplicadas
+                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
+                Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].errorThreshold }} (Cuanto menor es mejor)
+                Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].actualValue }}
+
