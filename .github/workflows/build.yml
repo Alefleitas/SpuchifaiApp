@@ -1,7 +1,4 @@
 on:
-  push:
-    branches:
-      - master
   pull_request:
     types: [opened, synchronize, reopened]
     branches:
@@ -34,11 +31,9 @@ jobs:
       - name: Comment SonarQube Quality Gate Status on PR
         run: |
           echo "SonarQube Quality Gate Status:\n$(cat quality-gate.json)" > pr_comment.txt
-          gh pr comment ${{ github.event.number }} --body "$(cat pr_comment.txt)"
+          gh pr comment ${{ github.event.pull_request.number }} --body "$(cat pr_comment.txt)"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install action-automatic-releases
         uses: marvinpinto/action-automatic-releases@latest
-
-        
