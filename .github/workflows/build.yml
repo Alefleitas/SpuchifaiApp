@@ -34,24 +34,24 @@ jobs:
           message: |
             Sonarqube Quality Gate | Project Status:
             ```
-            ========================================
+            ${{ steps.sonarqube_status.outputs.status }}
             ```
             Project Status: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.status }}
             Conditions:
               - Metric: new_reliability_rating
-                Status: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[0].status }}
+                Status: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[0].status == 'OK' && ':white_check_mark:' || ':x:' }}
                 Error Threshold: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[0].errorThreshold }}
                 Actual Value: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[0].actualValue }}
               - Metric: new_security_rating
-                Status: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[1].status }}
+                Status: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[1].status == 'OK' && ':white_check_mark:' || ':x:' }}
                 Error Threshold: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[1].errorThreshold }}
                 Actual Value: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[1].actualValue }}
               - Metric: new_maintainability_rating
-                Status: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[2].status }}
+                Status: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[2].status == 'OK' && ':white_check_mark:' || ':x:' }}
                 Error Threshold: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[2].errorThreshold }}
                 Actual Value: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[2].actualValue }}
               - Metric: new_duplicated_lines_density
-                Status: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].status }}
+                Status: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].status == 'OK' && ':white_check_mark:' || ':x:' }}
                 Error Threshold: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].errorThreshold }}
                 Actual Value: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].actualValue }}
             Ignored Conditions: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.ignoredConditions }}
