@@ -30,15 +30,11 @@ jobs:
           echo '::set-output name=status::$(cat quality-gate.json)'
 
       - name: Comment SonarQube Quality Gate Status on PR
-        run: echo "SonarQube Quality Gate Status:\n$(cat quality-gate.json)" > pr_comment.txt
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Create PR Comment
+        run: |
+          echo "SonarQube Quality Gate Status:\n$(cat quality-gate.json)" > pr_comment.txt
+          gh pr comment ${{ github.event.number }} --body "$(cat pr_comment.txt)"
+          
+      - name: Install action-automatic-releases
         uses: marvinpinto/action-automatic-releases@latest
-        with:
-          files: pr_comment.txt
-          edit: true
-          message: Add SonarQube Quality Gate Status
-          delete_previous: true 
 
         
