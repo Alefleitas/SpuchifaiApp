@@ -34,28 +34,28 @@ jobs:
           message: |
             Sonarqube Quality Gate | Project Status:
             ```
-            ${{ steps.sonarqube_status.outputs.status }}
+            ========================================
             ```
-            Project Status: ${{ steps.sonarqube_status.outputs.status.projectStatus.status }}
+            Project Status: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.status }}
             Conditions:
               - Metric: new_reliability_rating
-                Status: ${{ steps.sonarqube_status.outputs.status.projectStatus.conditions[0].status }}
-                Error Threshold: ${{ steps.sonarqube_status.outputs.status.projectStatus.conditions[0].errorThreshold }}
-                Actual Value: ${{ steps.sonarqube_status.outputs.status.projectStatus.conditions[0].actualValue }}
+                Status: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[0].status }}
+                Error Threshold: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[0].errorThreshold }}
+                Actual Value: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[0].actualValue }}
               - Metric: new_security_rating
-                Status: ${{ steps.sonarqube_status.outputs.status.projectStatus.conditions[1].status }}
-                Error Threshold: ${{ steps.sonarqube_status.outputs.status.projectStatus.conditions[1].errorThreshold }}
-                Actual Value: ${{ steps.sonarqube_status.outputs.status.projectStatus.conditions[1].actualValue }}
+                Status: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[1].status }}
+                Error Threshold: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[1].errorThreshold }}
+                Actual Value: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[1].actualValue }}
               - Metric: new_maintainability_rating
-                Status: ${{ steps.sonarqube_status.outputs.status.projectStatus.conditions[2].status }}
-                Error Threshold: ${{ steps.sonarqube_status.outputs.status.projectStatus.conditions[2].errorThreshold }}
-                Actual Value: ${{ steps.sonarqube_status.outputs.status.projectStatus.conditions[2].actualValue }}
+                Status: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[2].status }}
+                Error Threshold: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[2].errorThreshold }}
+                Actual Value: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[2].actualValue }}
               - Metric: new_duplicated_lines_density
-                Status: ${{ steps.sonarqube_status.outputs.status.projectStatus.conditions[3].status }}
-                Error Threshold: ${{ steps.sonarqube_status.outputs.status.projectStatus.conditions[3].errorThreshold }}
-                Actual Value: ${{ steps.sonarqube_status.outputs.status.projectStatus.conditions[3].actualValue }}
-            Ignored Conditions: ${{ steps.sonarqube_status.outputs.status.projectStatus.ignoredConditions }}
+                Status: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].status }}
+                Error Threshold: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].errorThreshold }}
+                Actual Value: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].actualValue }}
+            Ignored Conditions: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.ignoredConditions }}
             Period:
-              Mode: ${{ steps.sonarqube_status.outputs.status.projectStatus.period.mode }}
-              Date: ${{ steps.sonarqube_status.outputs.status.projectStatus.period.date }}
-            Cayc Status: ${{ steps.sonarqube_status.outputs.status.projectStatus.caycStatus }}
+              Mode: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.period.mode }}
+              Date: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.period.date }}
+            Cayc Status: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.caycStatus }}
