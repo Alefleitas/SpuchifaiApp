@@ -26,12 +26,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           curl -X GET -u "${SONAR_TOKEN}": -o quality-gate.json '${{ secrets.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=Spuchifai'
-          echo "::set-output name=status::$(cat quality-gate.json)"
-
-      - name: Check SonarQube Quality Gate Status
-        id: check_status
-        run: |
-          status=$(fromJson(steps.sonarqube_status.outputs.status).projectStatus.status)
+          status=$(cat quality-gate.json | jq -r '.projectStatus.status')
           echo "SONAR_STATUS=$status" >> $GITHUB_ENV
           if [[ "$status" == "ERROR" ]]; then
             echo "SonarQube Quality Gate status is ERROR. Blocking the pull request."
