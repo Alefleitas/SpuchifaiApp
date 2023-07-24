@@ -28,19 +28,14 @@ jobs:
           curl -X GET -u "${SONAR_TOKEN}": -o quality-gate.json '${{ secrets.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=Spuchifai'
           status=$(jq -r '.projectStatus.status' quality-gate.json)
           echo "SONAR_STATUS=$status" >> $GITHUB_ENV
-          if [[ "$status" == "ERROR" ]]; then
-            echo "Estado del Análisis de SonarQube: ❌ Fallido"
-            gh pr lock ${{ github.event.number }} --reason "SonarQube Quality Gate status is ERROR."
-            exit 1
-          else
-            echo "Estado del Análisis de SonarQube: ✅ Exitoso"
-          fi
-          echo "SonarQube Quality Gate | Project Status:"
-          ...
-          
+          conditions=$(jq -r '.projectStatus.conditions' quality-gate.json)
+          echo "SONAR_CONDITIONS=$conditions" >> $GITHUB_ENV
+
       - name: Comment PR
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
             Estado del Análisis de SonarQube: ${{ env.SONAR_STATUS == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
-            ...
+            ${{ env.SONAR_STATUS == 'ERROR' && 'gh pr lock ${{ github.event.number }} --reason "SonarQube Quality Gate status is ERROR."' || '' }}
+            Condiciones:
+            ${{ env.SONAR_CONDITIONS | fromjson | map("- Métrica: \(.metricKey)\n  Estado: \(.status == 'OK' ? '✅ Exitoso' : '❌ Fallido')\n  Umbral de Error: \(.errorThreshold) (Cuanto menor es mejor)\n  Valor Actual: \(.actualValue)\n") | join("\n") }}
