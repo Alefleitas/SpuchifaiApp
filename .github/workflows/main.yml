@@ -27,7 +27,7 @@ jobs:
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: |
-        curl -X POST -u "${SONAR_TOKEN}": -o quality-gate.json '{{SONAR_HOST_URL}}/api/qualitygates/project_status?projectKey=Spuchifai'
+        curl -X GET -u "${SONAR_TOKEN}": -o quality-gate.json '{{SONAR_HOST_URL}}/api/qualitygates/project_status?projectKey=Spuchifai'
         cat quality-gate.json
 
     # Optionally you can use the output from the Quality Gate in another step.
