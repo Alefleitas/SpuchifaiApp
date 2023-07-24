@@ -1,45 +1,39 @@
 on:
-  # Trigger analysis when pushing in master or pull requests, and when creating
-  # a pull request. 
   push:
     branches:
       - master
   pull_request:
-      types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened]
+
 name: Main Workflow
+
 jobs:
   sonarqube:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-      with:
-        # Disabling shallow clone is recommended for improving relevancy of reporting.
-        fetch-depth: 0
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-    # Triggering SonarQube analysis as results of it are required by Quality Gate check.
-    - name: SonarQube Scan
-      uses: sonarsource/sonarqube-scan-action@master
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
-    - name: Get SonarQube Quality Gate Status
-      id: sonarqube_status
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      run: |
-        curl -X GET -u "${SONAR_TOKEN}": -o quality-gate.json '${{ secrets.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=Spuchifai'
-        echo '::set-output name=status::$(cat quality-gate.json)'
+      - name: Get SonarQube Quality Gate Status
+        id: sonarqube_status
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          curl -X GET -u "${SONAR_TOKEN}": -o quality-gate.json '${{ secrets.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=Spuchifai'
+          echo '::set-output name=status::$(cat quality-gate.json)'
 
-    - name: Comment SonarQube Quality Gate Status on PR
-      uses: actions/github-script@v5
-      with:
-        script: |
-          const status = `SonarQube Quality Gate Status:\n${steps.sonarqube_status.outputs.status}`;
-          github.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: status
-          });
-
+      - name: Comment SonarQube Quality Gate Status on PR
+        uses: peter-evans/create-pull-request-comment@v2.9.1
+        with:
+          body: |
+            SonarQube Quality Gate Status:
+            ```
+            ${{ steps.sonarqube_status.outputs.status }}
+            ```
