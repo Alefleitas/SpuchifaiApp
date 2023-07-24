@@ -64,3 +64,4 @@ jobs:
               Modo: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.period.mode }}
               Fecha: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.period.date }}
             Estado Cumple aunque y cuando (CAYC): ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.caycStatus }} 
+
