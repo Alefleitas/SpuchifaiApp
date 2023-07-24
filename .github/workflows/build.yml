@@ -28,11 +28,22 @@ jobs:
           curl -X GET -u "${SONAR_TOKEN}": -o quality-gate.json '${{ secrets.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=Spuchifai'
           echo "::set-output name=status::$(cat quality-gate.json)"
 
+      - name: Check SonarQube Quality Gate Status
+        id: check_status
+        run: |
+          status=$(fromJson(steps.sonarqube_status.outputs.status).projectStatus.status)
+          echo "SONAR_STATUS=$status" >> $GITHUB_ENV
+          if [[ "$status" == "ERROR" ]]; then
+            echo "SonarQube Quality Gate status is ERROR. Blocking the pull request."
+            gh pr lock ${{ github.event.number }} --reason "SonarQube Quality Gate status is ERROR."
+            exit 1
+          fi
+
       - name: Comment PR
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
-            Estado del Análisis de SonarQube: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
+            Estado del Análisis de SonarQube: ${{ env.SONAR_STATUS == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
             Condiciones:
               - Métrica: Nuevo Índice de Fiabilidad
                 Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[0].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
