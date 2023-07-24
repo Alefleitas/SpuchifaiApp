@@ -29,11 +29,20 @@ jobs:
           echo '::set-output name=status::$(cat quality-gate.json)'
 
       - name: Comment SonarQube Quality Gate Status on PR
-        run: |
-          echo "SonarQube Quality Gate Status:\n$(cat quality-gate.json)" > pr_comment.txt
-          gh pr comment ${{ github.event.pull_request.number }} --body "$(cat pr_comment.txt)"
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('quality-gate.json', 'utf-8');
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `SonarQube Quality Gate Status:\n\`\`\`\n${body}\n\`\`\``
+            });
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
       - name: Install action-automatic-releases
         uses: marvinpinto/action-automatic-releases@latest
