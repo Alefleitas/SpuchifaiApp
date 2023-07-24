@@ -42,14 +42,13 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const { context, github } = require('@actions/github');
+            const { github } = require('@actions/github');
             const octokit = github.getOctokit(process.env.GITHUB_TOKEN);
             octokit.rest.pulls.update({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.payload.pull_request.number,
+              owner: githubContext.repo.owner,
+              repo: githubContext.repo.repo,
+              pull_number: githubContext.payload.pull_request.number,
               state: 'closed'
             });
 
             console.log('PR closed due to SonarQube analysis failure.');
-
