@@ -28,6 +28,15 @@ jobs:
           curl -X GET -u "${SONAR_TOKEN}": -o quality-gate.json '${{ secrets.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=Spuchifai'
           echo "::set-output name=status::$(cat quality-gate.json)"
 
+      - name: Check SonarQube Quality Gate Status
+        run: |
+          status=$(fromJson(steps.sonarqube_status.outputs.status).projectStatus.status)
+          if [[ "$status" == "ERROR" ]]; then
+            echo "SonarQube Quality Gate status is ERROR. Blocking the pull request."
+            gh pr lock ${{ github.event.number }} --reason "SonarQube Quality Gate status is ERROR."
+            exit 1
+          fi
+
       - name: Comment PR
         uses: thollander/actions-comment-pull-request@v2
         with:
@@ -50,8 +59,4 @@ jobs:
                 Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
                 Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].errorThreshold }} (Cuanto menor es mejor)
                 Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].actualValue }}
-            Condiciones Ignoradas: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.ignoredConditions }}
-            Período:
-              Modo: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.period.mode }}
-              Fecha: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.period.date }}
-            Estado Cumple aunque y cuando (CAYC): ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.caycStatus }}
+
