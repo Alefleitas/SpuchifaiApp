@@ -30,10 +30,14 @@ jobs:
           echo '::set-output name=status::$(cat quality-gate.json)'
 
       - name: Comment SonarQube Quality Gate Status on PR
-        uses: peter-evans/create-pull-request-comment@v2.9.1
+        uses: actions/github-script@v5
         with:
-          body: |
-            SonarQube Quality Gate Status:
-            ```
-            ${{ steps.sonarqube_status.outputs.status }}
-            ```
+          script: |
+            const status = `SonarQube Quality Gate Status:\n${steps.sonarqube_status.outputs.status}`;
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: status
+            });
+        
