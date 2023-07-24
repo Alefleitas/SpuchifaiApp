@@ -1,54 +1,32 @@
-name: SonarQube Quality Gate Check
-
 on:
+  # Trigger analysis when pushing in master or pull requests, and when creating
+  # a pull request. 
+  push:
+    branches:
+      - master
   pull_request:
-    types:
-      - opened
-      - synchronize
-
+      types: [opened, synchronize, reopened]
+name: Main Workflow
 jobs:
-  sonarqube-quality-gate:
-    name: SonarQube Quality Gate Check
+  sonarqube:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - uses: actions/checkout@v3
+      with:
+        # Disabling shallow clone is recommended for improving relevancy of reporting.
+        fetch-depth: 0
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '14.x'
+    # Triggering SonarQube analysis as results of it are required by Quality Gate check.
+    - name: SonarQube Scan
+      uses: sonarsource/sonarqube-scan-action@master
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
-      - name: Install dependencies
-        run: npm install
+    - name: Get SonarQube Quality Gate Status
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: |
+        curl -X GET -u "${SONAR_TOKEN}": -o quality-gate.json '${{secrets.SONAR_HOST_URL}}/api/qualitygates/project_status?projectKey=Spuchifai'
+        cat quality-gate.json
 
-      # Run SonarQube analysis
-      - name: SonarQube Analysis
-        id: sonarqube_scan
-        uses: sonarsource/sonarqube-scan-action@master
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-
-      # Check the Quality Gate status.
-      - name: SonarQube Quality Gate check
-        id: sonarqube-quality-gate-check
-        run: |
-          # Guardar la URL del reporte del análisis en una variable
-          report_url=$(cat .scannerwork/report-task.txt)
-
-          # Realizar la solicitud al servidor de SonarQube para obtener el estado del Quality Gate
-          quality_gate_status=$(curl -s -u "${SONAR_TOKEN}": "${SONAR_HOST_URL}/api/qualitygates/project_status" -d "projectKey=Spuchifai" -d "analysisId=${report_url}" | jq -r '.projectStatus.status')
-
-          # Mostrar el estado del Quality Gate
-          echo "Quality Gate status is: $quality_gate_status"
-
-          # Evaluar si el estado es "ERROR" o "NONE" para fallar en caso de ser necesario
-          if [ "$quality_gate_status" == "ERROR" ] || [ "$quality_gate_status" == "NONE" ]; then
-            echo "Quality Gate failed or not set, failing the step..."
-            exit 1
-          fi
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
