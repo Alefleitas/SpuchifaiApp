@@ -38,15 +38,7 @@ jobs:
 
       - name: Block PR on SonarQube Analysis Failure
         if: fromJson(steps.sonarqube_status.outputs.status).projectStatus.status == 'ERROR'
-        uses: actions/github-script@v4
+        uses: zloeber/pull-request-locker@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            github.pulls.update({
-              owner: github.context.repo.owner,
-              repo: github.context.repo.repo,
-              pull_number: github.context.payload.pull_request.number,
-              state: 'closed'
-            });
-
-            console.log('PR closed due to SonarQube analysis failure.');
+          comment: 'El análisis de SonarQube falló, se bloqueó el PR automáticamente.'
