@@ -32,30 +32,30 @@ jobs:
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
-            Sonarqube Quality Gate | Project Status:
+            Estado del Gate de Calidad de Sonarqube:
             ```
             ${{ steps.sonarqube_status.outputs.status }}
             ```
-            Project Status: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.status }}
-            Conditions:
-              - Metric: new_reliability_rating
-                Status: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[0].status == 'OK' && ':white_check_mark:' || ':x:' }}
-                Error Threshold: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[0].errorThreshold }}
-                Actual Value: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[0].actualValue }}
-              - Metric: new_security_rating
-                Status: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[1].status == 'OK' && ':white_check_mark:' || ':x:' }}
-                Error Threshold: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[1].errorThreshold }}
-                Actual Value: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[1].actualValue }}
-              - Metric: new_maintainability_rating
-                Status: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[2].status == 'OK' && ':white_check_mark:' || ':x:' }}
-                Error Threshold: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[2].errorThreshold }}
-                Actual Value: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[2].actualValue }}
-              - Metric: new_duplicated_lines_density
-                Status: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].status == 'OK' && ':white_check_mark:' || ':x:' }}
-                Error Threshold: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].errorThreshold }}
-                Actual Value: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].actualValue }}
-            Ignored Conditions: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.ignoredConditions }}
-            Period:
-              Mode: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.period.mode }}
-              Date: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.period.date }}
-            Cayc Status: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.caycStatus }}
+            Estado del Proyecto: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.status == 'OK' && ':white_check_mark: Exitoso' || ':x: Fallido' }}
+            Condiciones:
+              - Métrica: new_reliability_rating
+                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[0].status == 'OK' && ':white_check_mark: Exitoso' || ':x: Fallido' }}
+                Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[0].errorThreshold }} (Cuanto menor es mejor)
+                Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[0].actualValue }}
+              - Métrica: new_security_rating
+                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[1].status == 'OK' && ':white_check_mark: Exitoso' || ':x: Fallido' }}
+                Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[1].errorThreshold }} (Cuanto menor es mejor)
+                Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[1].actualValue }}
+              - Métrica: new_maintainability_rating
+                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[2].status == 'OK' && ':white_check_mark: Exitoso' || ':x: Fallido' }}
+                Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[2].errorThreshold }} (Cuanto menor es mejor)
+                Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[2].actualValue }}
+              - Métrica: new_duplicated_lines_density
+                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].status == 'OK' && ':white_check_mark: Exitoso' || ':x: Fallido' }}
+                Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].errorThreshold }} (Cuanto menor es mejor)
+                Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].actualValue }}
+            Condiciones Ignoradas: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.ignoredConditions }}
+            Período:
+              Modo: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.period.mode }}
+              Fecha: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.period.date }}
+            Estado Cayc: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.caycStatus }}
