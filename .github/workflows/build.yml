@@ -21,18 +21,14 @@ jobs:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
       - name: Get SonarQube Quality Gate Status
-        id: sonarqube_status
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           curl -X GET -u "${SONAR_TOKEN}": -o quality-gate.json '${{ secrets.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=Spuchifai'
-          echo "::set-output name=status::$(cat quality-gate.json)"
+          cat quality-gate.json
 
       - name: Comment PR
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
-            Sonarqube Quality Gate | Project Status:
-            ```
-            ${{ steps.sonarqube_status.outputs.status }}
-            ```
+            Hello world ! :wave:
