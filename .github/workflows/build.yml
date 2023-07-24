@@ -42,12 +42,10 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const { github } = require('@actions/github');
-            const octokit = github.getOctokit(process.env.GITHUB_TOKEN);
-            octokit.rest.pulls.update({
-              owner: githubContext.repo.owner,
-              repo: githubContext.repo.repo,
-              pull_number: githubContext.payload.pull_request.number,
+            github.pulls.update({
+              owner: github.context.repo.owner,
+              repo: github.context.repo.repo,
+              pull_number: github.context.payload.pull_request.number,
               state: 'closed'
             });
 
