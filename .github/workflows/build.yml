@@ -32,30 +32,26 @@ jobs:
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
-            Estado del Gate de Calidad de Sonarqube:
-            ```
-            ${{ steps.sonarqube_status.outputs.status }}
-            ```
-            Estado del Proyecto: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.status == 'OK' && ':white_check_mark: Exitoso' || ':x: Fallido' }}
+            Estado del Análisis de SonarQube: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
             Condiciones:
-              - Métrica: new_reliability_rating
-                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[0].status == 'OK' && ':white_check_mark: Exitoso' || ':x: Fallido' }}
+              - Métrica: Nuevo Índice de Fiabilidad
+                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[0].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
                 Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[0].errorThreshold }} (Cuanto menor es mejor)
                 Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[0].actualValue }}
-              - Métrica: new_security_rating
-                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[1].status == 'OK' && ':white_check_mark: Exitoso' || ':x: Fallido' }}
+              - Métrica: Nuevo Índice de Seguridad
+                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[1].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
                 Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[1].errorThreshold }} (Cuanto menor es mejor)
                 Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[1].actualValue }}
-              - Métrica: new_maintainability_rating
-                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[2].status == 'OK' && ':white_check_mark: Exitoso' || ':x: Fallido' }}
+              - Métrica: Nuevo Índice de Mantenibilidad
+                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[2].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
                 Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[2].errorThreshold }} (Cuanto menor es mejor)
                 Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[2].actualValue }}
-              - Métrica: new_duplicated_lines_density
-                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].status == 'OK' && ':white_check_mark: Exitoso' || ':x: Fallido' }}
+              - Métrica: Nueva Densidad de Líneas Duplicadas
+                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
                 Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].errorThreshold }} (Cuanto menor es mejor)
                 Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].actualValue }}
             Condiciones Ignoradas: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.ignoredConditions }}
             Período:
               Modo: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.period.mode }}
               Fecha: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.period.date }}
-            Estado Cayc: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.caycStatus }}
+            Estado Cumple aunque y cuando (CAYC): ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.caycStatus }}
