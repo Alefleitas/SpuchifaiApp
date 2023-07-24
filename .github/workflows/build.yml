@@ -30,14 +30,15 @@ jobs:
           echo '::set-output name=status::$(cat quality-gate.json)'
 
       - name: Comment SonarQube Quality Gate Status on PR
-        uses: actions/github-script@v5
+        run: echo "SonarQube Quality Gate Status:\n$(cat quality-gate.json)" > pr_comment.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create PR Comment
+        uses: marvinpinto/action-automatic-releases@latest
         with:
-          script: |
-            const status = `SonarQube Quality Gate Status:\n${steps.sonarqube_status.outputs.status}`;
-            github.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: status
-            });
+          files: pr_comment.txt
+          edit: true
+          message: Add SonarQube Quality Gate Status
+          delete_previous: true 
+
         
