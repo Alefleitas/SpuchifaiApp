@@ -55,3 +55,10 @@ jobs:
               Modo: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.period.mode }}
               Fecha: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.period.date }}
             Estado Cumple aunque y cuando (CAYC): ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.caycStatus }}
+
+      - name: Block PR on SonarQube Analysis Failure
+        if: fromJson(steps.sonarqube_status.outputs.status).projectStatus.status == 'ERROR'
+        uses: approvaltests/approvals-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          approve-command: "SonarQube analysis failed. Please fix the issues before merging."
