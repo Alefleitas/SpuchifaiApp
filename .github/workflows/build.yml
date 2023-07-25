@@ -26,7 +26,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           curl -X GET -u "${SONAR_TOKEN}": -o quality-gate.json '${{ secrets.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=Spuchifai'
-          echo "::set-output name=status::$(cat quality-gate.json)"
+          cat quality-gate.json
 
       - name: Comment PR
         uses: thollander/actions-comment-pull-request@v2
