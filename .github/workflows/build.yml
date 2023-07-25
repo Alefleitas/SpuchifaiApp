@@ -42,24 +42,23 @@ jobs:
           message: |
             Estado del Análisis de SonarQube: ${{ fromJson(env.status).projectStatus.status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
             Condiciones:
-              - Métrica: ${ {fromJson(env.status).projectStatus.conditions[0].status == 'OK' && '✅' || '❌' } } Nuevo Índice de Fiabilidad 🏆
+              - Métrica: Nuevo Índice de Fiabilidad
                 Estado: ${{ fromJson(env.status).projectStatus.conditions[0].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
                 Umbral de Error: ${{ fromJson(env.status).projectStatus.conditions[0].errorThreshold }} (Cuanto menor es mejor)
                 Valor Actual: ${{ fromJson(env.status).projectStatus.conditions[0].actualValue }}
-              - Métrica: ${ {fromJson(env.status).projectStatus.conditions[1].status == 'OK' && '✅' || '❌' } } Nuevo Índice de Seguridad :shield:
+              - Métrica: Nuevo Índice de Seguridad
                 Estado: ${{ fromJson(env.status).projectStatus.conditions[1].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
                 Umbral de Error: ${{ fromJson(env.status).projectStatus.conditions[1].errorThreshold }} (Cuanto menor es mejor)
                 Valor Actual: ${{ fromJson(env.status).projectStatus.conditions[1].actualValue }}
-              - Métrica: ${ {fromJson(env.status).projectStatus.conditions[2].status == 'OK' && '✅' || '❌' } } Nuevo Índice de Mantenibilidad 🛠️
+              - Métrica: Nuevo Índice de Mantenibilidad
                 Estado: ${{ fromJson(env.status).projectStatus.conditions[2].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
                 Umbral de Error: ${{ fromJson(env.status).projectStatus.conditions[2].errorThreshold }} (Cuanto menor es mejor)
                 Valor Actual: ${{ fromJson(env.status).projectStatus.conditions[2].actualValue }}
-              - Métrica: ${ {fromJson(env.status).projectStatus.conditions[3].status == 'OK' && '✅' || '⚠️' } } Nueva Densidad de Líneas Duplicadas 📝
-                Estado: ${{ fromJson(env.status).projectStatus.conditions[3].status == 'OK' && fromJson(env.status).projectStatus.conditions[3].actualValue < fromJson(env.status).projectStatus.conditions[3].errorThreshold ? '✅ Exitoso' : '⚠️ Fallido' }}
+              - Métrica: Nueva Densidad de Líneas Duplicadas
+                Estado: ${{ fromJson(env.status).projectStatus.conditions[3].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
                 Umbral de Error: ${{ fromJson(env.status).projectStatus.conditions[3].errorThreshold }} (Cuanto menor es mejor)
                 Valor Actual: ${{ fromJson(env.status).projectStatus.conditions[3].actualValue }}
-                Emoji: ${{ fromJson(env.status).projectStatus.conditions[3].status == 'OK' && fromJson(env.status).projectStatus.conditions[3].actualValue < fromJson(env.status).projectStatus.conditions[3].errorThreshold ? '✅' : '⚠️' }}
-            
+         
       - name: Bloquear PR on SonarQube Analysis Failure
         if: env.status && fromJson(env.status).projectStatus.status == 'ERROR'
         env:
