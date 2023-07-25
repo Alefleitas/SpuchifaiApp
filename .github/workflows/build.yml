@@ -58,6 +58,15 @@ jobs:
                 Estado: ${{ fromJson(env.status).projectStatus.conditions[3].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
                 Umbral de Error: ${{ fromJson(env.status).projectStatus.conditions[3].errorThreshold }} (Cuanto menor es mejor)
                 Valor Actual: ${{ fromJson(env.status).projectStatus.conditions[3].actualValue }}
+                {% if fromJson(env.status).projectStatus.conditions[3].status == 'OK' %}
+                {% if fromJson(env.status).projectStatus.conditions[3].actualValue | int < fromJson(env.status).projectStatus.conditions[3].errorThreshold | int %}
+                Emoji: ✅
+                {% else %}
+                Emoji: ⚠️
+                {% endif %}
+                {% else %}
+                Emoji: ❌
+                {% endif %}
          
       - name: Bloquear PR on SonarQube Analysis Failure
         if: env.status && fromJson(env.status).projectStatus.status == 'ERROR'
