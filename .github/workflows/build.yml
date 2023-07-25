@@ -57,7 +57,7 @@ jobs:
             Estado Cumple aunque y cuando (CAYC): ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.caycStatus }}
 
       - name: Block PR on SonarQube Analysis Failure
-        if: steps.sonarqube_status.outputs.status != 'undefined' && fromJson(steps.sonarqube_status.outputs.status).projectStatus.status == 'ERROR'
+        if: steps.sonarqube_status.outputs.status && fromJson(steps.sonarqube_status.outputs.status).projectStatus.status == 'ERROR'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
