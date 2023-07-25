@@ -60,48 +60,18 @@ jobs:
                 Estado: ${{ fromJson(env.status).projectStatus.conditions[3].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
                 Umbral de Error: ${{ fromJson(env.status).projectStatus.conditions[3].errorThreshold }} (Cuanto menor es mejor)
                 Valor Actual: ${{ fromJson(env.status).projectStatus.conditions[3].actualValue }}
-                
-              - Archivo: ${{ fromJson(env.sonarqube_measures.components[0].path) }}
-                Lenguaje: ${{ fromJson(env.sonarqube_measures.components[0].language) }}
-                Métrica: Densidad de Líneas Duplicadas (Nuevo Código) ✅
-                Valor: ${{ fromJson(env.sonarqube_measures.components[0].measures[0].period.value) }}
-              - Archivo: ${{ fromJson(env.sonarqube_measures.components[0].path) }}
-                Lenguaje: ${{ fromJson(env.sonarqube_measures.components[0].language) }}
-                Métrica: Cobertura de Líneas (Nuevo Código) ✅
-                Valor: ${{ fromJson(env.sonarqube_measures.components[0].measures[1].period.value) }}
-              - Archivo: ${{ fromJson(env.sonarqube_measures.components[0].path) }}
-                Lenguaje: ${{ fromJson(env.sonarqube_measures.components[0].language) }}
-                Métrica: Code Smells (Nuevo Código) ✅
-                Valor: ${{ fromJson(env.sonarqube_measures.components[0].measures[2].value) }}
-              - Archivo: ${{ fromJson(env.sonarqube_measures.components[0].path) }}
-                Lenguaje: ${{ fromJson(env.sonarqube_measures.components[0].language) }}
-                Métrica: Nuevos Bugs (Nuevo Código) ✅
-                Valor: ${{ fromJson(env.sonarqube_measures.components[0].measures[3].period.value) }}
-              - Archivo: ${{ fromJson(env.sonarqube_measures.components[0].path) }}
-                Lenguaje: ${{ fromJson(env.sonarqube_measures.components[0].language) }}
-                Métrica: Nuevas Vulnerabilidades (Nuevo Código) ✅
-                Valor: ${{ fromJson(env.sonarqube_measures.components[0].measures[4].period.value) }}
-              - Archivo: ${{ fromJson(env.sonarqube_measures.components[1].path) }}
-                Lenguaje: ${{ fromJson(env.sonarqube_measures.components[1].language) }}
-                Métrica: Densidad de Líneas Duplicadas (Nuevo Código) ✅
-                Valor: ${{ fromJson(env.sonarqube_measures.components[1].measures[0].period.value) }}
-              - Archivo: ${{ fromJson(env.sonarqube_measures.components[1].path) }}
-                Lenguaje: ${{ fromJson(env.sonarqube_measures.components[1].language) }}
-                Métrica: Cobertura de Líneas (Nuevo Código) ✅
-                Valor: ${{ fromJson(env.sonarqube_measures.components[1].measures[1].period.value) }}
-              - Archivo: ${{ fromJson(env.sonarqube_measures.components[1].path) }}
-                Lenguaje: ${{ fromJson(env.sonarqube_measures.components[1].language) }}
-                Métrica: Code Smells (Nuevo Código) ✅
-                Valor: ${{ fromJson(env.sonarqube_measures.components[1].measures[2].value) }}
-              - Archivo: ${{ fromJson(env.sonarqube_measures.components[1].path) }}
-                Lenguaje: ${{ fromJson(env.sonarqube_measures.components[1].language) }}
-                Métrica: Nuevos Bugs (Nuevo Código) ✅
-                Valor: ${{ fromJson(env.sonarqube_measures.components[1].measures[3].period.value) }}
-              - Archivo: ${{ fromJson(env.sonarqube_measures.components[1].path) }}
-                Lenguaje: ${{ fromJson(env.sonarqube_measures.components[1].language) }}
-                Métrica: Nuevas Vulnerabilidades (Nuevo Código) ✅
-                Valor: ${{ fromJson(env.sonarqube_measures.components[1].measures[4].period.value) }}
-
+              - Métrica: Nuevo Índice de Bugs
+                Estado: ${{ fromJson(env.sonarqube_measures).measures[0].period.bestValue == true && '✅ Exitoso' || '❌ Fallido' }}
+                Valor: ${{ fromJson(env.sonarqube_measures).measures[0].period.value }} :bug:
+              - Métrica: Nuevo Índice de Code Smells
+                Estado: ${{ fromJson(env.sonarqube_measures).measures[1].period.bestValue == true && '✅ Exitoso' || '❌ Fallido' }}
+                Valor: ${{ fromJson(env.sonarqube_measures).measures[1].period.value }} :nose:
+              - Métrica: Nueva Densidad de Líneas Duplicadas
+                Estado: ${{ fromJson(env.sonarqube_measures).measures[2].period.bestValue == true && '✅ Exitoso' || '❌ Fallido' }}
+                Valor: ${{ fromJson(env.sonarqube_measures).measures[2].period.value }} :repeat:
+              - Métrica: Nueva Vulnerabilidades
+                Estado: ${{ fromJson(env.sonarqube_measures).measures[3].period.bestValue == true && '✅ Exitoso' || '❌ Fallido' }}
+                Valor: ${{ fromJson(env.sonarqube_measures).measures[3].period.value }} :shield:
 
 
       - name: Block PR on SonarQube Analysis Failure
