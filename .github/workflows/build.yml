@@ -55,9 +55,9 @@ jobs:
               Modo: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.period.mode }}
               Fecha: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.period.date }}
             Estado Cumple aunque y cuando (CAYC): ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.caycStatus }}
-            
+
       - name: Block PR on SonarQube Analysis Failure
-        if: fromJson(steps.sonarqube_status.outputs.status).projectStatus.status == 'ERROR'
+        if: steps.sonarqube_status.outputs.status != 'undefined' && fromJson(steps.sonarqube_status.outputs.status).projectStatus.status == 'ERROR'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
