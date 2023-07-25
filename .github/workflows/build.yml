@@ -42,8 +42,8 @@ jobs:
         with:
           message: |
             SonarQube Analysis Metrics:
-
-            ${{ fromJson(env.SONARQUBE_MEASURES).components | map("- File: \(.name)\n  📊 Duplicated Lines Density: \(.measures[] | select(.metric == "new_duplicated_lines_density").period.value)\n  💡 Code Smells: \(.measures[] | select(.metric == "code_smells").value)\n  🐞 New Bugs: \(.measures[] | select(.metric == "new_bugs").period.value)\n  🛡️ New Vulnerabilities: \(.measures[] | select(.metric == "new_vulnerabilities").period.value)\n") | join("\n") | indent(4) }}
+            ${{ fromJson(env.SONARQUBE_MEASURES).components }}
+            ${{ fromJson(env.SONARQUBE_MEASURES).components | map("- File: \(.name)\n  📊 Duplicated Lines Density: \(.measures[] | select(.metric == \"new_duplicated_lines_density\").period.value)\n  💡 Code Smells: \(.measures[] | select(.metric == \"code_smells\").value)\n  🐞 New Bugs: \(.measures[] | select(.metric == \"new_bugs\").period.value)\n  🛡️ New Vulnerabilities: \(.measures[] | select(.metric == \"new_vulnerabilities\").period.value)") | join("\n") | indent(4) }}
 
 
       - name: Block PR on SonarQube Analysis Failure
