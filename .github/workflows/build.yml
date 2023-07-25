@@ -78,3 +78,70 @@ jobs:
             -H "Accept: application/vnd.github.v3+json" \
             "https://api.github.com/repos/$owner/$repo/issues/$pr_number/lock" 2>&1)
           echo "$response"
+          
+# Custom function to format the SonarQube measures with icons
+  formatMetrics:
+    runs-on: ubuntu-latest
+    outputs:
+      formattedMetrics: ${{ steps.format_metrics.outputs.formattedMetrics }}
+    steps:
+      - id: format_metrics
+        env:
+          MEASURES_JSON: ${{ toJson(needs.sonarqube_measures.outputs.measures) }}
+        run: |
+          metrics=$(echo $MEASURES_JSON | jq -r '.metrics')
+          components=$(echo $MEASURES_JSON | jq -r '.components')
+
+          # Define icons for metrics
+          declare -A metricIcons=(
+            ["code_smells"]="❗"
+            ["new_bugs"]="🐞"
+            ["new_duplicated_lines_density"]="📋"
+            ["new_line_coverage"]="📊"
+            ["new_security_hotspots_reviewed"]="🔒"
+            ["new_vulnerabilities"]="⚠️"
+          )
+
+          # Function to get the icon for a metric
+          getMetricIcon() {
+            metric="$1"
+            icon="${metricIcons[$metric]}"
+            echo "$icon"
+          }
+
+          # Function to format a measure entry
+          formatMeasureEntry() {
+            metric="$1"
+            value="$2"
+            icon=$(getMetricIcon "$metric")
+            echo "  - Métrica: $metric $icon"
+            echo "    Valor: $value"
+          }
+
+          # Function to process measures for each component
+          processMeasures() {
+            componentMeasures="$1"
+            for entry in $(echo "$componentMeasures" | jq -r '.[] | @base64'); do
+              _jq() {
+                echo ${entry} | base64 --decode | jq -r ${1}
+              }
+
+              metric=$(_jq '.metric')
+              value=$(_jq '.value')
+              formattedEntry=$(formatMeasureEntry "$metric" "$value")
+              echo "$formattedEntry"
+            done
+          }
+
+          # Iterate through components and format their measures
+          while IFS= read -r component; do
+            componentMeasures=$(echo "$components" | jq -r --argjson component "$component" '.[] | select(.key == $component) | .measures')
+            if [ "$componentMeasures" != "null" ]; then
+              componentName=$(echo "$component" | jq -r '.name')
+              echo "Componente: $componentName"
+              processMeasures "$componentMeasures"
+            fi
+          done <<< "$components"
+
+          # Output the formatted metrics
+          echo "::set-output name=formattedMetrics::$formattedMetrics"
