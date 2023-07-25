@@ -40,45 +40,18 @@ jobs:
       - name: Comment PR with SonarQube Measures
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONARQUBE_MEASURES: ${{ env.sonarqube_measures }}
         run: |
-          const data = ${{fromJson(env.sonarqube_measures)}};
-          if (!data || !data.components) {
+          comment=$(jq -r '.components | map("SonarQube Analysis Metrics:\n\n- File: \(.name)\n  📊 Duplicated Lines Density: \(.measures[] | select(.metric == "new_duplicated_lines_density").period.value)\n  💡 Code Smells: \(.measures[] | select(.metric == "code_smells").value)\n  🐞 New Bugs: \(.measures[] | select(.metric == "new_bugs").period.value)\n  🛡️ New Vulnerabilities: \(.measures[] | select(.metric == "new_vulnerabilities").period.value)\n") | join("\n\n")' <<< "$SONARQUBE_MEASURES")
+
+          if [ -z "$comment" ]; then
             echo "No SonarQube measures found."
-            return
-          }
-
-          let comment = 'SonarQube Analysis Metrics:\n\n';
-
-          data.components.forEach(component => {
-            comment += `- File: ${component.name}\n`;
-            component.measures.forEach(measure => {
-              let icon = '';
-              switch (measure.metric) {
-                case 'new_duplicated_lines_density':
-                  icon = '📊';
-                  break;
-                case 'code_smells':
-                  icon = '💡';
-                  break;
-                case 'new_bugs':
-                  icon = '🐞';
-                  break;
-                case 'new_vulnerabilities':
-                  icon = '🛡️';
-                  break;
-                // Add more cases for other metrics if needed
-                default:
-                  icon = '';
-              }
-              comment += `  ${icon} ${measure.metric}: ${measure.period.value}\n`;
-            });
-            comment += '\n';
-          });
+            exit 0
+          fi
 
           echo "$comment"  # Show comment in the console
 
           curl -X POST -H "Authorization: Bearer $GITHUB_TOKEN" -H "Content-Type: application/json" -d "{\"body\":\"$comment\"}" "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${{ github.event.pull_request.number }}/comments"
-
 
       - name: Block PR on SonarQube Analysis Failure
         if: env.status && fromJson(env.status).projectStatus.status == 'ERROR'
