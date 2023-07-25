@@ -65,6 +65,34 @@ jobs:
               Fecha: ${{ fromJson(env.status).projectStatus.period.date }}
             Estado Cumple aunque y cuando (CAYC): ${{ fromJson(env.status).projectStatus.caycStatus }}
 
+            Métricas del Proyecto:
+                    {{#each fromJson(env.sonarqube_measures).components}}
+                      - Archivo: {{this.path}}
+                        Lenguaje: {{this.language}}
+                        {{#each this.measures}}
+                          {{#if (eq this.metric "new_duplicated_lines_density")}}
+                            Métrica: Densidad de Líneas Duplicadas (Nuevo Código)
+                            Valor: {{this.period.value}}
+                          {{/if}}
+                          {{#if (eq this.metric "new_line_coverage")}}
+                            Métrica: Cobertura de Líneas (Nuevo Código)
+                            Valor: {{this.period.value}}
+                          {{/if}}
+                          {{#if (eq this.metric "code_smells")}}
+                            Métrica: Code Smells (Nuevo Código)
+                            Valor: {{this.value}}
+                          {{/if}}
+                          {{#if (eq this.metric "new_bugs")}}
+                            Métrica: Nuevos Bugs (Nuevo Código)
+                            Valor: {{this.period.value}}
+                          {{/if}}
+                          {{#if (eq this.metric "new_vulnerabilities")}}
+                            Métrica: Nuevas Vulnerabilidades (Nuevo Código)
+                            Valor: {{this.period.value}}
+                          {{/if}}
+                        {{/each}}
+                    {{/each}}
+
       - name: Block PR on SonarQube Analysis Failure
         if: env.status && fromJson(env.status).projectStatus.status == 'ERROR'
         env:
