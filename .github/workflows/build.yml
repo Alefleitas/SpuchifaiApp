@@ -66,29 +66,48 @@ jobs:
 
             Componente: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].name }} (${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].path }}):
               - Métrica: Índice de Líneas Duplicadas en Código Nuevo
-                Estado: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[0].period.value }}% ${{ if fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[0].bestValue }}(mejor valor){{ else }}(peor valor){{ endif }} ⚙️
+                Estado: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[0].period.value }}%$'\n'${{ if fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[0].bestValue }}(mejor valor){{ else }}(peor valor){{ endif }} ⚙️$'\n'📝 Cantidad de Líneas Duplicadas: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[0].value }}
 
               - Métrica: Índice de Cobertura de Líneas en Código Nuevo
-                Estado: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[1].period.value }}% ${{ if fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[1].bestValue }}(mejor valor){{ else }}(peor valor){{ endif }} 🔍
+                Estado: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[1].period.value }}%$'\n'${{ if fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[1].bestValue }}(mejor valor){{ else }}(peor valor){{ endif }} 🔍$'\n'📝 Cantidad de Líneas Cubiertas: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[1].value }}
 
               - Métrica: Code Smells (Malos Olores)
-                Cantidad de Code Smells: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[2].value }} 📦
+                📦 Cantidad de Code Smells: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[2].value }}
 
               - Métrica: Nuevos Bugs
-                Cantidad de Bugs: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[3].value }} 🐞
+                🐞 Cantidad de Bugs: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[3].value }}
 
               - Métrica: Nuevas Vulnerabilidades
-                Cantidad de Vulnerabilidades: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[4].value }} 🔒
+                🔒 Cantidad de Vulnerabilidades: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[4].value }}
 
             Componente: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[1].name }} (${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[1].path }}):
               - Métrica: Índice de Líneas Duplicadas en Código Nuevo
-                Estado: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[1].measures[0].period.value }}% ${{ if fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[1].measures[0].bestValue }}(mejor valor){{ else }}(peor valor){{ endif }} ⚙️
+                Estado: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[1].measures[0].period.value }}%$'\n'${{ if fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[1].measures[0].bestValue }}(mejor valor){{ else }}(peor valor){{ endif }} ⚙️$'\n'📝 Cantidad de Líneas Duplicadas: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[1].measures[0].value }}
 
               - Métrica: Code Smells (Malos Olores)
-                Cantidad de Code Smells: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[1].measures[1].value }} 📦
+                📦 Cantidad de Code Smells: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[1].measures[1].value }}
 
               - Métrica: Nuevos Bugs
-                Cantidad de Bugs: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[1].measures[2].value }} 🐞
+                🐞 Cantidad de Bugs: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[1].measures[2].value }}
 
               - Métrica: Nuevas Vulnerabilidades
-                Cantidad de Vulnerabilidades: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[1].measures[3].value }} 🔒
+                🔒 Cantidad de Vulnerabilidades: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[1].measures[3].value }}
+
+      - name: Check SonarQube Analysis Status
+        if: steps.sonarqube_status.outputs.sonarqube_status != 'undefined' && fromJson(steps.sonarqube_status.outputs.sonarqube_status).projectStatus.status == 'ERROR'
+        run: exit 1
+
+      - name: Block PR on SonarQube Analysis Failure
+        if: steps.sonarqube_status.outputs.sonarqube_status != 'undefined' && fromJson(steps.sonarqube_status.outputs.sonarqube_status).projectStatus.status == 'ERROR'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "The SonarQube analysis failed. Blocking the PR..."
+          pr_number="${{ github.event.pull_request.number }}"
+          owner="${{ github.repository_owner }}"
+          repo="${{ github.repository }}"
+          response=$(curl -X POST -v \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/$owner/$repo/issues/$pr_number/lock" 2>&1)
+          echo "$response"
