@@ -65,10 +65,10 @@ jobs:
             Estado Cumple aunque y cuando (CAYC): ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.caycStatus }}
 
             Medidas SonarQube:
-            ${{ formatMetrics(fromJson(steps.sonarqube_measures.outputs.measures)) }}
+            ${{ steps.format_metrics.outputs.formattedMetrics }}
 
   # Custom function to format the SonarQube measures with icons
-  formatMetrics:
+  format_metrics:
     runs-on: ubuntu-latest
     outputs:
       formattedMetrics: ${{ steps.format_metrics.outputs.formattedMetrics }}
@@ -121,16 +121,19 @@ jobs:
             done
           }
 
-          # Iterate through components and format their measures
+          # Process measures for each component and store in a variable
+          formattedMetrics=""
           for component in $(echo "$components" | jq -r '.[] | @base64'); do
             _jq() {
               echo ${component} | base64 --decode | jq -r ${1}
             }
 
             componentName=$(_jq '.name')
-            echo "Componente: $componentName"
+            formattedMetrics+="Componente: $componentName"$'\n'
             componentMeasures=$(_jq '.measures')
-            processMeasures "$componentMeasures"
+            processedMeasures=$(processMeasures "$componentMeasures")
+            formattedMetrics+="$processedMeasures"$'\n'
           done
 
-          echo "::set-output name=formattedMetrics::$(cat sonarqube_measures.json)"
+          # Set the formattedMetrics as output
+          echo "::set-output name=formattedMetrics::${formattedMetrics}"
