@@ -28,43 +28,48 @@ jobs:
           curl -X GET -u "${SONAR_TOKEN}": -o quality-gate.json '${{ secrets.SONAR_HOST_URL }}/api/measures/component_tree?additionalFields=metrics&ps=500&asc=false&metricSort=new_duplicated_lines_density&s=metricPeriod&metricSortFilter=withMeasuresOnly&metricPeriodSort=1&component=Spuchifai&metricKeys=new_duplicated_lines_density,new_line_coverage,code_smells,new_bugs,new_vulnerabilities,new_security_hotspots_reviewed&strategy=leaves'
           echo "::set-output name=status::$(cat quality-gate.json)"
 
-      - name: Comment PR
-        uses: thollander/actions-comment-pull-request@v2
-        with:
-          message: |
-            Detalle del Análisis de SonarQube:
+      - name: Comment PR with SonarQube Measures
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          const data = ${{fromJson(env.sonarqube_measures)}};
+          if (!data || !data.components) {
+            echo "No SonarQube measures found."
+            return
+          }
 
-            Componentes Analizados:
+          let comment = 'SonarQube Analysis Metrics:\n\n';
 
-            ${{ fromJson(steps.sonarqube_status.outputs.status).components[0].name }}:
-              - Métrica: Índice de Líneas Duplicadas en Código Nuevo
-                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).components[0].measures[0].period.value }}% (${ {fromJson(steps.sonarqube_status.outputs.status).components[0].measures[0].bestValue ? 'mejor valor' : 'peor valor'}})
-                Cantidad de Líneas Duplicadas: ${ {fromJson(steps.sonarqube_status.outputs.status).components[0].measures[0].value }}
+          data.components.forEach(component => {
+            comment += `- File: ${component.name}\n`;
+            component.measures.forEach(measure => {
+              let icon = '';
+              switch (measure.metric) {
+                case 'new_duplicated_lines_density':
+                  icon = '📊';
+                  break;
+                case 'code_smells':
+                  icon = '💡';
+                  break;
+                case 'new_bugs':
+                  icon = '🐞';
+                  break;
+                case 'new_vulnerabilities':
+                  icon = '🛡️';
+                  break;
+                // Add more cases for other metrics if needed
+                default:
+                  icon = '';
+              }
+              comment += `  ${icon} ${measure.metric}: ${measure.period.value}\n`;
+            });
+            comment += '\n';
+          });
 
-              - Métrica: Cobertura de Líneas en Código Nuevo
-                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).components[0].measures[1].period.value }}% (${ {fromJson(steps.sonarqube_status.outputs.status).components[0].measures[1].bestValue ? 'mejor valor' : 'peor valor'}})
+          echo "$comment"  # Show comment in the console
 
-              - Métrica: Code Smells (Malos Olores)
-                Cantidad de Code Smells: ${ {fromJson(steps.sonarqube_status.outputs.status).components[0].measures[2].value }}
+          curl -X POST -H "Authorization: Bearer $GITHUB_TOKEN" -H "Content-Type: application/json" -d "{\"body\":\"$comment\"}" "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${{ github.event.pull_request.number }}/comments"
 
-              - Métrica: Nuevos Bugs
-                Cantidad de Bugs: ${ {fromJson(steps.sonarqube_status.outputs.status).components[0].measures[3].value }}
-
-              - Métrica: Nuevas Vulnerabilidades
-                Cantidad de Vulnerabilidades: ${ {fromJson(steps.sonarqube_status.outputs.status).components[0].measures[4].value }}
-
-            ${{ fromJson(steps.sonarqube_status.outputs.status).components[1].name }}:
-              - Métrica: Índice de Líneas Duplicadas en Código Nuevo
-                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).components[1].measures[0].period.value }}% (${ {fromJson(steps.sonarqube_status.outputs.status).components[1].measures[0].bestValue ? 'mejor valor' : 'peor valor'}})
-
-              - Métrica: Code Smells (Malos Olores)
-                Cantidad de Code Smells: ${ {fromJson(steps.sonarqube_status.outputs.status).components[1].measures[1].value }}
-
-              - Métrica: Nuevos Bugs
-                Cantidad de Bugs: ${ {fromJson(steps.sonarqube_status.outputs.status).components[1].measures[2].value }}
-
-              - Métrica: Nuevas Vulnerabilidades
-                Cantidad de Vulnerabilidades: ${ {fromJson(steps.sonarqube_status.outputs.status).components[1].measures[3].value }}
 
       - name: Check SonarQube Analysis Status
         if: steps.sonarqube_status.outputs.status != 'undefined' && fromJson(steps.sonarqube_status.outputs.status).components[0].measures.length == 0
