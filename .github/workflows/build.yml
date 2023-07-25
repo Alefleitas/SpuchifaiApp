@@ -50,14 +50,14 @@ jobs:
                 Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
                 Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].errorThreshold }} (Cuanto menor es mejor)
                 Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].actualValue }}
-            Condiciones Ignoradas: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.ignoredConditions }}
-            Período:
-              Modo: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.period.mode }}
-              Fecha: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.period.date }}
-            Estado Cumple aunque y cuando (CAYC): ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.caycStatus }}
+
+
+      - name: Check SonarQube Analysis Status
+        if: steps.sonarqube_status.outputs.status != 'undefined' && fromJson(steps.sonarqube_status.outputs.status).projectStatus.status == 'ERROR'
+        run: exit 1
 
       - name: Block PR on SonarQube Analysis Failure
-        if: steps.sonarqube_status.outputs.status && fromJson(steps.sonarqube_status.outputs.status).projectStatus.status == 'ERROR'
+        if: steps.sonarqube_status.outputs.status != 'undefined' && fromJson(steps.sonarqube_status.outputs.status).projectStatus.status == 'ERROR'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
