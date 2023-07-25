@@ -4,7 +4,7 @@ on:
     branches:
       - master
 
-name: Main Workflow
+name: Analisis Sonarqube
 
 jobs:
   sonarqube:
@@ -14,29 +14,27 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: SonarQube Scan
+      - name: Escaneo Sonarqube
         uses: sonarsource/sonarqube-scan-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
-      - name: Get SonarQube Quality Gate Status
+      - name: Obtener SonarQube Quality Gate Status
         id: sonarqube_status
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          curl -X GET -u "${SONAR_TOKEN}": -o quality-gate.json '${{ secrets.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=Spuchifai'
+          curl -X GET -u "${SONAR_TOKEN}": -o quality-gate.json '${{ secrets.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=${{secrets.SONAR_PROJECT_KEY}}'
           echo "status=$(cat quality-gate.json)" >> $GITHUB_ENV
 
-      - name: Get SonarQube Measures
+      - name: Get SonarQube Measures ( Detalle de archivos afectados )
         id: sonarqube_measures
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          curl -X GET -u "${SONAR_TOKEN}": -o sonarqube_measures.json '${{ secrets.SONAR_HOST_URL }}/api/measures/component_tree?additionalFields=metrics&ps=500&asc=false&metricSort=new_duplicated_lines_density&s=metricPeriod&metricSortFilter=withMeasuresOnly&metricPeriodSort=1&component=${{secrets.SONAR_PROJECT_KEY}}&metricKeys=new_duplicated_lines_density,new_line_coverage,code_smells,new_bugs,new_vulnerabilities,new_security_hotspots_reviewed&strategy=leaves'
-          sonarqube_measures=$(cat sonarqube_measures.json)
-          echo "sonarqube_measures=${sonarqube_measures}" >> $GITHUB_ENV
-
+          curl -X GET -u "${SONAR_TOKEN}": -o sonarqube_measures.json '${{ secrets.SONAR_HOST_URL }}/api/measures/search?metricKeys=new_duplicated_lines_density,new_line_coverage,new_code_smells,new_bugs,new_vulnerabilities,new_security_hotspots_reviewed&projectKeys=${{secrets.SONAR_PROJECT_KEY}}'
+          cat sonarqube_measures.json
 
       - name: Comment PR
         uses: thollander/actions-comment-pull-request@v2
@@ -60,20 +58,8 @@ jobs:
                 Estado: ${{ fromJson(env.status).projectStatus.conditions[3].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
                 Umbral de Error: ${{ fromJson(env.status).projectStatus.conditions[3].errorThreshold }} (Cuanto menor es mejor)
                 Valor Actual: ${{ fromJson(env.status).projectStatus.conditions[3].actualValue }}
-              - Métrica: Nuevo Índice de Bugs
-                Estado: ${{ fromJSON(env.sonarqube_measures).measures[0].period.bestValue == 'true' && '✅ Exitoso' || '❌ Fallido' }} :bug:
-                Valor: ${{ fromJSON(env.sonarqube_measures).measures[0].period.value }}
-              - Métrica: Nuevo Índice de Code Smells
-                Estado: ${{ fromJSON(env.sonarqube_measures).measures[1].period.bestValue == 'true' && '✅ Exitoso' || '❌ Fallido' }} :nose:
-                Valor: ${{ fromJSON(env.sonarqube_measures).measures[1].period.value }}
-              - Métrica: Nueva Densidad de Líneas Duplicadas
-                Estado: ${{ fromJSON(env.sonarqube_measures).measures[2].period.bestValue == 'true' && '✅ Exitoso' || '❌ Fallido' }} :repeat:
-                Valor: ${{ fromJSON(env.sonarqube_measures).measures[2].period.value }}
-              - Métrica: Nueva Vulnerabilidades
-                Estado: ${{ fromJSON(env.sonarqube_measures).measures[3].period.bestValue == 'true' && '✅ Exitoso' || '❌ Fallido' }} :shield:
-                Valor: ${{ fromJSON(env.sonarqube_measures).measures[3].period.value }}
-
-      - name: Block PR on SonarQube Analysis Failure
+         
+      - name: Bloquear PR on SonarQube Analysis Failure
         if: env.status && fromJson(env.status).projectStatus.status == 'ERROR'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
