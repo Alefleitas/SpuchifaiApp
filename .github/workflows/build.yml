@@ -4,7 +4,7 @@ on:
     branches:
       - master
 
-name: Detalle Análisis SonarQube
+name: Main Workflow
 
 jobs:
   sonarqube:
@@ -25,71 +25,48 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          curl -X GET -u "${SONAR_TOKEN}": -o sonarqube.json '${{ secrets.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=Spuchifai'
-          echo "::set-output name=sonarqube_status::$(cat sonarqube.json)"
-
-      - name: Get SonarQube Measures
-        id: sonarqube_measures
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          curl -X GET -u "${SONAR_TOKEN}": -o sonarqube_measures.json '${{ secrets.SONAR_HOST_URL }}/api/measures/component_tree?additionalFields=metrics&ps=500&asc=false&metricSort=new_duplicated_lines_density&s=metricPeriod&metricSortFilter=withMeasuresOnly&metricPeriodSort=1&component=Spuchifai&metricKeys=new_duplicated_lines_density,new_line_coverage,code_smells,new_bugs,new_vulnerabilities,new_security_hotspots_reviewed&strategy=leaves'
-          echo "::set-output name=sonarqube_measures::$(cat sonarqube_measures.json)"
-
-      - name: Run Script
-        id: run_script
-        run: |
-          sonarqube_measures=$(cat sonarqube_measures.json)
-          status=$(cat sonarqube.json)
-          mapfile -t component_names < <(jq -r '.components[].name' <<< "$sonarqube_measures")
-          mapfile -t component_paths < <(jq -r '.components[].path' <<< "$sonarqube_measures")
-          mapfile -t measures < <(jq -r '.components[].measures | map({ metric, period })' <<< "$sonarqube_measures")
-
-          details=""
-          for i in "${!component_names[@]}"; do
-            detail="- Componente: ${component_names[i]} (${component_paths[i]}):"
-            for measure in "${measures[i]}"; do
-              metric=$(jq -r '.metric' <<< "$measure")
-              bestValue=$(jq -r '.period.bestValue' <<< "$measure")
-              value=$(jq -r '.period.value' <<< "$measure")
-              detail="$detail\n  - Métrica: $metric"
-              detail="$detail\n    Estado: $value%$([[ $bestValue == 'true' ]] && echo ' (mejor valor)' || echo ' (peor valor)')"
-              detail="$detail\n    📝 Cantidad de Líneas Cubiertas: $(jq -r '.value' <<< "$measure")"
-            done
-            details="$details$detail\n"
-          done
-
-          echo "::set-output name=fallback::✅ Exitoso"
-          echo "::set-output name=run_result::$(jq -n --argjson details "$details" "$sonarqube_measures")"
+          curl -X GET -u "${SONAR_TOKEN}": -o quality-gate.json '${{ secrets.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=Spuchifai'
+          echo "::set-output name=status::$(cat quality-gate.json)"
 
       - name: Comment PR
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
-            Detalle del Análisis de SonarQube:
-
-            Estado del Análisis de SonarQube: ${{ fromJson(steps.sonarqube_status.outputs.sonarqube_status).projectStatus.status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
-
+            Estado del Análisis de SonarQube: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
             Condiciones:
               - Métrica: Nuevo Índice de Fiabilidad
-                Estado: ${{ steps.run_script.outputs.fallback || '✅ Exitoso' }}
-                Umbral de Error: ${{ steps.run_script.outputs.run_result.measures[0].period.bestValue }} (Cuanto menor es mejor)
-                Valor Actual: ${{ steps.run_script.outputs.run_result.measures[0].period.value }}%
-
+                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[0].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
+                Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[0].errorThreshold }} (Cuanto menor es mejor)
+                Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[0].actualValue }}
               - Métrica: Nuevo Índice de Seguridad
-                Estado: ${{ steps.run_script.outputs.run_result.measures[1].period.bestValue || '✅ Exitoso' }}
-                Umbral de Error: ${{ steps.run_script.outputs.run_result.measures[1].period.bestValue }} (Cuanto menor es mejor)
-                Valor Actual: ${{ steps.run_script.outputs.run_result.measures[1].period.value }}%
-
+                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[1].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
+                Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[1].errorThreshold }} (Cuanto menor es mejor)
+                Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[1].actualValue }}
               - Métrica: Nuevo Índice de Mantenibilidad
-                Estado: ${{ steps.run_script.outputs.run_result.measures[2].period.bestValue || '✅ Exitoso' }}
-                Umbral de Error: ${{ steps.run_script.outputs.run_result.measures[2].period.bestValue }} (Cuanto menor es mejor)
-                Valor Actual: ${{ steps.run_script.outputs.run_result.measures[2].period.value }}%
-
+                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[2].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
+                Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[2].errorThreshold }} (Cuanto menor es mejor)
+                Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[2].actualValue }}
               - Métrica: Nueva Densidad de Líneas Duplicadas
-                Estado: ${{ steps.run_script.outputs.run_result.measures[3].period.bestValue || '✅ Exitoso' }}
-                Umbral de Error: ${{ steps.run_script.outputs.run_result.measures[3].period.bestValue }} (Cuanto menor es mejor)
-                Valor Actual: ${{ steps.run_script.outputs.run_result.measures[3].period.value }}%
+                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
+                Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].errorThreshold }} (Cuanto menor es mejor)
+                Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].actualValue }}
+            Condiciones Ignoradas: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.ignoredConditions }}
+            Período:
+              Modo: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.period.mode }}
+              Fecha: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.period.date }}
+            Estado Cumple aunque y cuando (CAYC): ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.caycStatus }}
 
-            Detalles de las Métricas:
-${{ steps.run_script.outputs.run_result.details }}
+      - name: Block PR on SonarQube Analysis Failure
+        if: steps.sonarqube_status.outputs.status && fromJson(steps.sonarqube_status.outputs.status).projectStatus.status == 'ERROR'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "The SonarQube analysis failed. Blocking the PR..."
+          pr_number="${{ github.event.pull_request.number }}"
+          owner="${{ github.repository_owner }}"
+          repo="${{ github.repository }}"
+          response=$(curl -X POST -v \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/$owner/$repo/issues/$pr_number/lock" 2>&1)
+          echo "$response"
