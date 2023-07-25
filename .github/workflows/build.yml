@@ -38,11 +38,16 @@ jobs:
           echo "sonarqube_measures=${sonarqube_measures}" >> $GITHUB_ENV
 
       - name: Comment PR with SonarQube Measures
-        uses: actions/github-script@v5
+        uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const data = ${{fromJson(env.sonarqube_measures)}};
+            if (!data || !data.components) {
+              console.log('No SonarQube measures found.');
+              return;
+            }
+
             let comment = 'SonarQube Analysis Metrics:\n\n';
 
             data.components.forEach(component => {
@@ -78,8 +83,6 @@ jobs:
               repo: context.repo.repo,
               body: comment,
             });
-
-
 
       - name: Block PR on SonarQube Analysis Failure
         if: env.status && fromJson(env.status).projectStatus.status == 'ERROR'
