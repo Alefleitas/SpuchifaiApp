@@ -42,19 +42,19 @@ jobs:
           message: |
             Estado del Análisis de SonarQube: ${{ fromJson(env.status).projectStatus.status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
             Condiciones:
-              - Métrica: Nuevo Índice de Fiabilidad
+              - Métrica: :white_check_mark: Nuevo Índice de Fiabilidad
                 Estado: ${{ fromJson(env.status).projectStatus.conditions[0].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
                 Umbral de Error: ${{ fromJson(env.status).projectStatus.conditions[0].errorThreshold }} (Cuanto menor es mejor)
                 Valor Actual: ${{ fromJson(env.status).projectStatus.conditions[0].actualValue }}
-              - Métrica: Nuevo Índice de Seguridad
+              - Métrica: :white_check_mark: Nuevo Índice de Seguridad :shield:
                 Estado: ${{ fromJson(env.status).projectStatus.conditions[1].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
                 Umbral de Error: ${{ fromJson(env.status).projectStatus.conditions[1].errorThreshold }} (Cuanto menor es mejor)
                 Valor Actual: ${{ fromJson(env.status).projectStatus.conditions[1].actualValue }}
-              - Métrica: Nuevo Índice de Mantenibilidad
+              - Métrica: :white_check_mark: Nuevo Índice de Mantenibilidad
                 Estado: ${{ fromJson(env.status).projectStatus.conditions[2].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
                 Umbral de Error: ${{ fromJson(env.status).projectStatus.conditions[2].errorThreshold }} (Cuanto menor es mejor)
                 Valor Actual: ${{ fromJson(env.status).projectStatus.conditions[2].actualValue }}
-              - Métrica: Nueva Densidad de Líneas Duplicadas
+              - Métrica: :white_check_mark: Nueva Densidad de Líneas Duplicadas
                 Estado: ${{ fromJson(env.status).projectStatus.conditions[3].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
                 Umbral de Error: ${{ fromJson(env.status).projectStatus.conditions[3].errorThreshold }} (Cuanto menor es mejor)
                 Valor Actual: ${{ fromJson(env.status).projectStatus.conditions[3].actualValue }}
