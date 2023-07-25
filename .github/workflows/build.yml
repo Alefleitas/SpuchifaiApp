@@ -64,5 +64,36 @@ jobs:
               Fecha: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.period.date }}
             Estado Cumple aunque y cuando (CAYC): ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.caycStatus }}
 
-            Componentes Analizados:
-            ${{ steps.sonarqube_measures.outputs.measures | fromJson | tojson | replace('{"components":', '') | replace(',"metrics":[', '') | replace(']}', '') }}
+            - name: Get SonarQube Measures
+              id: sonarqube_measures
+              env:
+                SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+              run: |
+                curl -X GET -u "${SONAR_TOKEN}": -o sonarqube_measures.json '${{ secrets.SONAR_HOST_URL }}/api/measures/component_tree?additionalFields=metrics&ps=500&asc=false&metricSort=new_duplicated_lines_density&s=metricPeriod&metricSortFilter=withMeasuresOnly&metricPeriodSort=1&component=${{secrets.SONAR_PROJECT_KEY}}&metricKeys=new_duplicated_lines_density,new_line_coverage,code_smells,new_bugs,new_vulnerabilities,new_security_hotspots_reviewed&strategy=leaves'
+                echo "::set-output name=measures::$(cat sonarqube_measures.json)"
+
+            - name: Comment PR with SonarQube Analysis Details
+              uses: thollander/actions-comment-pull-request@v2
+              with:
+                message: |
+                  Estado del Análisis de SonarQube: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.status == 'OK' ? '✅ Exitoso' : '❌ Fallido' }}
+
+                  Detalle del Análisis de SonarQube:
+
+                  Componentes Analizados:
+
+                  {{#each fromJson(steps.sonarqube_measures.outputs.measures).components}}
+                  {{this.name}} ({{this.language}}):
+
+                  {{#each this.measures}}
+                  Métrica: {{lookup ../metrics this.metric "name"}}
+                  Estado: {{this.period.value}}% ({{this.bestValue ? 'mejor valor' : 'peor valor'}})
+                  {{#if this.value}}
+                  {{lookup ../metrics this.metric "icon"}} Cantidad: {{this.value}}
+                  {{/if}}
+                  {{/each}}
+                  {{/each}}
+              env:
+                SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+                SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
