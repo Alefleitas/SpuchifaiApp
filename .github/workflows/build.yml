@@ -36,44 +36,8 @@ jobs:
           curl -X GET -u "${SONAR_TOKEN}": -o sonarqube_measures.json '${{ secrets.SONAR_HOST_URL }}/api/measures/component_tree?additionalFields=metrics&ps=500&asc=false&metricSort=new_duplicated_lines_density&s=metricPeriod&metricSortFilter=withMeasuresOnly&metricPeriodSort=1&component=${{secrets.SONAR_PROJECT_KEY}}&metricKeys=new_duplicated_lines_density,new_line_coverage,code_smells,new_bugs,new_vulnerabilities,new_security_hotspots_reviewed&strategy=leaves'
           echo "::set-output name=measures::$(cat sonarqube_measures.json)"
 
-      - name: Comment PR
-        uses: thollander/actions-comment-pull-request@v2
-        with:
-          message: |
-            Estado del Análisis de SonarQube: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
-            Condiciones:
-              - Métrica: Nuevo Índice de Fiabilidad
-                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[0].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
-                Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[0].errorThreshold }} (Cuanto menor es mejor)
-                Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[0].actualValue }}
-              - Métrica: Nuevo Índice de Seguridad
-                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[1].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
-                Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[1].errorThreshold }} (Cuanto menor es mejor)
-                Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[1].actualValue }}
-              - Métrica: Nuevo Índice de Mantenibilidad
-                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[2].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
-                Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[2].errorThreshold }} (Cuanto menor es mejor)
-                Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[2].actualValue }}
-              - Métrica: Nueva Densidad de Líneas Duplicadas
-                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
-                Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].errorThreshold }} (Cuanto menor es mejor)
-                Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].actualValue }}
-            Condiciones Ignoradas: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.ignoredConditions }}
-            Período:
-              Modo: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.period.mode }}
-              Fecha: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.period.date }}
-            Estado Cumple aunque y cuando (CAYC): ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.caycStatus }}
-
-            Medidas SonarQube:
-            ${{ steps.format_metrics.outputs.formattedMetrics }}
-
-  # Custom function to format the SonarQube measures with icons
-  format_metrics:
-    runs-on: ubuntu-latest
-    outputs:
-      formattedMetrics: ${{ steps.format_metrics.outputs.formattedMetrics }}
-    steps:
-      - id: format_metrics
+      - name: Format and Comment PR
+        id: format_and_comment
         env:
           MEASURES_JSON: ${{ steps.sonarqube_measures.outputs.measures }}
         run: |
@@ -135,5 +99,11 @@ jobs:
             formattedMetrics+="$processedMeasures"$'\n'
           done
 
-          # Set the formattedMetrics as output
-          echo "::set-output name=formattedMetrics::${formattedMetrics}"
+          # Prepare the comment message
+          comment_message="Estado del Análisis de SonarQube: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}"
+          comment_message+="\nCondiciones:"
+          # ... Include the rest of the original comment content here ...
+          comment_message+="\nMedidas SonarQube:\n$formattedMetrics"
+
+          # Comment the PR with the message
+          echo "$comment_message" | gh pr comment ${{ github.event.number }}
