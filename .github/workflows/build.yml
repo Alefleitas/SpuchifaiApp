@@ -37,6 +37,7 @@ jobs:
           sonarqube_measures=$(cat sonarqube_measures.json)
           echo "sonarqube_measures=${sonarqube_measures}" >> $GITHUB_ENV
 
+
       - name: Comment PR
         uses: thollander/actions-comment-pull-request@v2
         with:
@@ -59,30 +60,35 @@ jobs:
                 Estado: ${{ fromJson(env.status).projectStatus.conditions[3].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
                 Umbral de Error: ${{ fromJson(env.status).projectStatus.conditions[3].errorThreshold }} (Cuanto menor es mejor)
                 Valor Actual: ${{ fromJson(env.status).projectStatus.conditions[3].actualValue }}
+              # Agregar las métricas del proyecto aquí
+              {{#each fromJson(env.sonarqube_measures).components}}
+              - Archivo: {{this.path}}
+                Lenguaje: {{this.language}}
+                {{#each this.measures}}
+                  {{#if (eq this.metric "new_duplicated_lines_density")}}
+                  Métrica: Densidad de Líneas Duplicadas (Nuevo Código)
+                  Valor: {{this.period.value}}
+                  {{/if}}
+                  {{#if (eq this.metric "new_line_coverage")}}
+                  Métrica: Cobertura de Líneas (Nuevo Código)
+                  Valor: {{this.period.value}}
+                  {{/if}}
+                  {{#if (eq this.metric "code_smells")}}
+                  Métrica: Code Smells (Nuevo Código)
+                  Valor: {{this.value}}
+                  {{/if}}
+                  {{#if (eq this.metric "new_bugs")}}
+                  Métrica: Nuevos Bugs (Nuevo Código)
+                  Valor: {{this.period.value}}
+                  {{/if}}
+                  {{#if (eq this.metric "new_vulnerabilities")}}
+                  Métrica: Nuevas Vulnerabilidades (Nuevo Código)
+                  Valor: {{this.period.value}}
+                  {{/if}}
+                {{/each}}
+              {{/each}}
+              # Fin de las métricas del proyecto
 
-            Métricas del Proyecto:
-              ${{ each component in fromJson(env.sonarqube_measures).components }}
-                - Archivo: ${{ component.path }}
-                  Lenguaje: ${{ component.language }}
-                  ${{ each measure in component.measures }}
-                    ${{ if eq measure.metric "new_duplicated_lines_density" }}
-                      Métrica: Densidad de Líneas Duplicadas (Nuevo Código)
-                      Valor: ${{ measure.period.value }}
-                    ${{ else if eq measure.metric "new_line_coverage" }}
-                      Métrica: Cobertura de Líneas (Nuevo Código)
-                      Valor: ${{ measure.period.value }}
-                    ${{ else if eq measure.metric "code_smells" }}
-                      Métrica: Code Smells (Nuevo Código)
-                      Valor: ${{ measure.value }}
-                    ${{ else if eq measure.metric "new_bugs" }}
-                      Métrica: Nuevos Bugs (Nuevo Código)
-                      Valor: ${{ measure.period.value }}
-                    ${{ else if eq measure.metric "new_vulnerabilities" }}
-                      Métrica: Nuevas Vulnerabilidades (Nuevo Código)
-                      Valor: ${{ measure.period.value }}
-                    ${{ /if }}
-                  ${{ /each }}
-              ${{ /each }}
 
 
       - name: Block PR on SonarQube Analysis Failure
