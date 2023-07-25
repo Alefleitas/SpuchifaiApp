@@ -37,14 +37,33 @@ jobs:
           sonarqube_measures=$(cat sonarqube_measures.json)
           echo "sonarqube_measures=${sonarqube_measures}" >> $GITHUB_ENV
 
-      - name: Comment PR with SonarQube Measures
+      - name: Comment PR
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
-            SonarQube Analysis Metrics:
-            ${{ fromJson(env.SONARQUBE_MEASURES).components }}
-            ${{ fromJson(env.SONARQUBE_MEASURES).components | map("- File: \(.name)\n  📊 Duplicated Lines Density: \(.measures[] | select(.metric == \"new_duplicated_lines_density\").period.value)\n  💡 Code Smells: \(.measures[] | select(.metric == \"code_smells\").value)\n  🐞 New Bugs: \(.measures[] | select(.metric == \"new_bugs\").period.value)\n  🛡️ New Vulnerabilities: \(.measures[] | select(.metric == \"new_vulnerabilities\").period.value)") | join("\n") | indent(4) }}
-
+            Estado del Análisis de SonarQube: ${{ fromJson(env.status).projectStatus.status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
+            Condiciones:
+              - Métrica: Nuevo Índice de Fiabilidad
+                Estado: ${{ fromJson(env.status).projectStatus.conditions[0].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
+                Umbral de Error: ${{ fromJson(env.status).projectStatus.conditions[0].errorThreshold }} (Cuanto menor es mejor)
+                Valor Actual: ${{ fromJson(env.status).projectStatus.conditions[0].actualValue }}
+              - Métrica: Nuevo Índice de Seguridad
+                Estado: ${{ fromJson(env.status).projectStatus.conditions[1].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
+                Umbral de Error: ${{ fromJson(env.status).projectStatus.conditions[1].errorThreshold }} (Cuanto menor es mejor)
+                Valor Actual: ${{ fromJson(env.status).projectStatus.conditions[1].actualValue }}
+              - Métrica: Nuevo Índice de Mantenibilidad
+                Estado: ${{ fromJson(env.status).projectStatus.conditions[2].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
+                Umbral de Error: ${{ fromJson(env.status).projectStatus.conditions[2].errorThreshold }} (Cuanto menor es mejor)
+                Valor Actual: ${{ fromJson(env.status).projectStatus.conditions[2].actualValue }}
+              - Métrica: Nueva Densidad de Líneas Duplicadas
+                Estado: ${{ fromJson(env.status).projectStatus.conditions[3].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
+                Umbral de Error: ${{ fromJson(env.status).projectStatus.conditions[3].errorThreshold }} (Cuanto menor es mejor)
+                Valor Actual: ${{ fromJson(env.status).projectStatus.conditions[3].actualValue }}
+            Condiciones Ignoradas: ${{ fromJson(env.status).projectStatus.ignoredConditions }}
+            Período:
+              Modo: ${{ fromJson(env.status).projectStatus.period.mode }}
+              Fecha: ${{ fromJson(env.status).projectStatus.period.date }}
+            Estado Cumple aunque y cuando (CAYC): ${{ fromJson(env.status).projectStatus.caycStatus }}
 
       - name: Block PR on SonarQube Analysis Failure
         if: env.status && fromJson(env.status).projectStatus.status == 'ERROR'
