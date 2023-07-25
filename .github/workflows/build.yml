@@ -61,18 +61,17 @@ jobs:
                 Umbral de Error: ${{ fromJson(env.status).projectStatus.conditions[3].errorThreshold }} (Cuanto menor es mejor)
                 Valor Actual: ${{ fromJson(env.status).projectStatus.conditions[3].actualValue }}
               - Métrica: Nuevo Índice de Bugs
-                Estado: ${{ fromJson(env.sonarqube_measures).measures[0].period.bestValue == true && '✅ Exitoso' || '❌ Fallido' }}
-                Valor: ${{ fromJson(env.sonarqube_measures).measures[0].period.value }} :bug:
+                Estado: ${{ fromJSON(env.sonarqube_measures).measures[0].period.bestValue == 'true' && '✅ Exitoso' || '❌ Fallido' }} :bug:
+                Valor: ${{ fromJSON(env.sonarqube_measures).measures[0].period.value }}
               - Métrica: Nuevo Índice de Code Smells
-                Estado: ${{ fromJson(env.sonarqube_measures).measures[1].period.bestValue == true && '✅ Exitoso' || '❌ Fallido' }}
-                Valor: ${{ fromJson(env.sonarqube_measures).measures[1].period.value }} :nose:
+                Estado: ${{ fromJSON(env.sonarqube_measures).measures[1].period.bestValue == 'true' && '✅ Exitoso' || '❌ Fallido' }} :nose:
+                Valor: ${{ fromJSON(env.sonarqube_measures).measures[1].period.value }}
               - Métrica: Nueva Densidad de Líneas Duplicadas
-                Estado: ${{ fromJson(env.sonarqube_measures).measures[2].period.bestValue == true && '✅ Exitoso' || '❌ Fallido' }}
-                Valor: ${{ fromJson(env.sonarqube_measures).measures[2].period.value }} :repeat:
+                Estado: ${{ fromJSON(env.sonarqube_measures).measures[2].period.bestValue == 'true' && '✅ Exitoso' || '❌ Fallido' }} :repeat:
+                Valor: ${{ fromJSON(env.sonarqube_measures).measures[2].period.value }}
               - Métrica: Nueva Vulnerabilidades
-                Estado: ${{ fromJson(env.sonarqube_measures).measures[3].period.bestValue == true && '✅ Exitoso' || '❌ Fallido' }}
-                Valor: ${{ fromJson(env.sonarqube_measures).measures[3].period.value }} :shield:
-
+                Estado: ${{ fromJSON(env.sonarqube_measures).measures[3].period.bestValue == 'true' && '✅ Exitoso' || '❌ Fallido' }} :shield:
+                Valor: ${{ fromJSON(env.sonarqube_measures).measures[3].period.value }}
 
       - name: Block PR on SonarQube Analysis Failure
         if: env.status && fromJson(env.status).projectStatus.status == 'ERROR'
