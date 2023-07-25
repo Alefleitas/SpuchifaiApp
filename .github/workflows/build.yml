@@ -1,10 +1,10 @@
-name: Main Workflow
-
 on:
   pull_request:
     types: [opened, synchronize, reopened]
     branches:
       - master
+
+name: Main Workflow
 
 jobs:
   sonarqube:
@@ -33,77 +33,48 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          curl -X GET -u "${SONAR_TOKEN}": -o sonarqube_measures.json '${{ secrets.SONAR_HOST_URL }}/api/measures/component_tree?additionalFields=metrics&ps=500&asc=false&metricSort=new_duplicated_lines_density&s=metricPeriod&metricSortFilter=withMeasuresOnly&metricPeriodSort=1&component=${{secrets.SONAR_PROJECT_KEY}}&metricKeys=new_duplicated_lines_density,new_line_coverage,code_smells,new_bugs,new_vulnerabilities,new_security_hotspots_reviewed&strategy=leaves'
-          echo "::set-output name=measures::$(cat sonarqube_measures.json)"
+          curl -X GET -u "${SONAR_TOKEN}": -o sonarqube_measures.json '${{ secrets.SONAR_HOST_URL }}/api/measures/component_tree?additionalFields=metrics&ps=500&asc=false&metricSort=new_duplicated_lines_density&s=metricPeriod&metricSortFilter=withMeasuresOnly&metricPeriodSort=1&component=${{secrets.SONAR_PROJECT_KEY}}&metricKeys=new_duplicated_lines_density,new_line_coverage,new_code_smells,new_bugs,new_vulnerabilities,new_security_hotspots_reviewed&strategy=leaves'
+           cat sonarqube_measures.json
 
-      - name: Format and Comment PR
-        id: format_and_comment
+      - name: Comment PR
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            Estado del Análisis de SonarQube: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
+            Condiciones:
+              - Métrica: Nuevo Índice de Fiabilidad
+                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[0].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
+                Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[0].errorThreshold }} (Cuanto menor es mejor)
+                Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[0].actualValue }}
+              - Métrica: Nuevo Índice de Seguridad
+                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[1].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
+                Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[1].errorThreshold }} (Cuanto menor es mejor)
+                Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[1].actualValue }}
+              - Métrica: Nuevo Índice de Mantenibilidad
+                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[2].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
+                Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[2].errorThreshold }} (Cuanto menor es mejor)
+                Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[2].actualValue }}
+              - Métrica: Nueva Densidad de Líneas Duplicadas
+                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
+                Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].errorThreshold }} (Cuanto menor es mejor)
+                Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].actualValue }}
+            Condiciones Ignoradas: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.ignoredConditions }}
+            Período:
+              Modo: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.period.mode }}
+              Fecha: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.period.date }}
+            Estado Cumple aunque y cuando (CAYC): ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.caycStatus }}
+
+      - name: Block PR on SonarQube Analysis Failure
+        if: steps.sonarqube_status.outputs.status && fromJson(steps.sonarqube_status.outputs.status).projectStatus.status == 'ERROR'
         env:
-          MEASURES_JSON: ${{ steps.sonarqube_measures.outputs.measures }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          metrics=$(echo $MEASURES_JSON | jq -r '.metrics')
-          components=$(echo $MEASURES_JSON | jq -r '.components')
-
-          # Define icons for metrics
-          declare -A metricIcons=(
-            ["code_smells"]="❗"
-            ["new_bugs"]="🐞"
-            ["new_duplicated_lines_density"]="📋"
-            ["new_line_coverage"]="📊"
-            ["new_security_hotspots_reviewed"]="🔒"
-            ["new_vulnerabilities"]="⚠️"
-          )
-
-          # Function to get the icon for a metric
-          getMetricIcon() {
-            metric="$1"
-            icon="${metricIcons[$metric]}"
-            echo "$icon"
-          }
-
-          # Function to format a measure entry
-          formatMeasureEntry() {
-            metric="$1"
-            value="$2"
-            icon=$(getMetricIcon "$metric")
-            echo "  - Métrica: $metric $icon"
-            echo "    Valor: $value"
-          }
-
-          # Function to process measures for each component
-          processMeasures() {
-            componentMeasures="$1"
-            for entry in $(echo "$componentMeasures" | jq -r '.[] | @base64'); do
-              _jq() {
-                echo ${entry} | base64 --decode | jq -r ${1}
-              }
-
-              metric=$(_jq '.metric')
-              value=$(_jq '.value')
-              formattedEntry=$(formatMeasureEntry "$metric" "$value")
-              echo "$formattedEntry"
-            done
-          }
-
-          # Process measures for each component and store in a variable
-          formattedMetrics=""
-          for component in $(echo "$components" | jq -r '.[] | @base64'); do
-            _jq() {
-              echo ${component} | base64 --decode | jq -r ${1}
-            }
-
-            componentName=$(_jq '.name')
-            formattedMetrics+="Componente: $componentName"$'\n'
-            componentMeasures=$(_jq '.measures')
-            processedMeasures=$(processMeasures "$componentMeasures")
-            formattedMetrics+="$processedMeasures"$'\n'
-          done
-
-          # Prepare the comment message
-          comment_message="Estado del Análisis de SonarQube: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}"
-          comment_message+="\nCondiciones:"
-          # ... Include the rest of the original comment content here ...
-          comment_message+="\nMedidas SonarQube:\n$formattedMetrics"
-
-          # Comment the PR with the message
-          echo "$comment_message" | gh pr comment ${{ github.event.number }}
+          echo "The SonarQube analysis failed. Blocking the PR..."
+          pr_number="${{ github.event.pull_request.number }}"
+          owner="${{ github.repository_owner }}"
+          repo="${{ github.repository }}"
+          response=$(curl -X POST -v \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/$owner/$repo/issues/$pr_number/lock" 2>&1)
+          echo "$response"
