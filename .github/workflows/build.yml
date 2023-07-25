@@ -66,10 +66,10 @@ jobs:
 
             Componente: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].name }} (${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].path }}):
               - Métrica: Índice de Líneas Duplicadas en Código Nuevo
-                Estado: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[0].period.value }}% (${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[0].bestValue ? 'mejor valor' : 'peor valor'}}) ⚙️
+                Estado: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[0].period.value }}% (${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[0].bestValue ? 'mejor valor' : 'peor valor' }}) ⚙️
 
               - Métrica: Índice de Cobertura de Líneas en Código Nuevo
-                Estado: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[1].period.value }}% (${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[1].bestValue ? 'mejor valor' : 'peor valor'}}) 🔍
+                Estado: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[1].period.value }}% (${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[1].bestValue ? 'mejor valor' : 'peor valor' }}) 🔍
 
               - Métrica: Code Smells (Malos Olores)
                 Cantidad de Code Smells: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[2].value }} 📦
@@ -82,7 +82,7 @@ jobs:
 
             Componente: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[1].name }} (${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[1].path }}):
               - Métrica: Índice de Líneas Duplicadas en Código Nuevo
-                Estado: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[1].measures[0].period.value }}% (${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[1].measures[0].bestValue ? 'mejor valor' : 'peor valor'}}) ⚙️
+                Estado: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[1].measures[0].period.value }}% (${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[1].measures[0].bestValue ? 'mejor valor' : 'peor valor' }}) ⚙️
 
               - Métrica: Code Smells (Malos Olores)
                 Cantidad de Code Smells: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[1].measures[1].value }} 📦
