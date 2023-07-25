@@ -4,7 +4,7 @@ on:
     branches:
       - master
 
-name: Main Workflow
+name: Detalle Análisis SonarQube
 
 jobs:
   sonarqube:
@@ -25,43 +25,57 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          curl -X GET -u "${SONAR_TOKEN}": -o quality-gate.json '${{ secrets.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=Spuchifai'
+          curl -X GET -u "${SONAR_TOKEN}": -o quality-gate.json '${{ secrets.SONAR_HOST_URL }}/api/measures/component_tree?additionalFields=metrics&ps=500&asc=false&metricSort=new_duplicated_lines_density&s=metricPeriod&metricSortFilter=withMeasuresOnly&metricPeriodSort=1&component=Spuchifai&metricKeys=new_duplicated_lines_density,new_line_coverage,code_smells,new_bugs,new_vulnerabilities,new_security_hotspots_reviewed&strategy=leaves'
           echo "::set-output name=status::$(cat quality-gate.json)"
 
       - name: Comment PR
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
-            Estado del Análisis de SonarQube: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
-            Condiciones:
-              - Métrica: Nuevo Índice de Fiabilidad
-                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[0].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
-                Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[0].errorThreshold }} (Cuanto menor es mejor)
-                Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[0].actualValue }}
-              - Métrica: Nuevo Índice de Seguridad
-                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[1].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
-                Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[1].errorThreshold }} (Cuanto menor es mejor)
-                Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[1].actualValue }}
-              - Métrica: Nuevo Índice de Mantenibilidad
-                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[2].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
-                Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[2].errorThreshold }} (Cuanto menor es mejor)
-                Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[2].actualValue }}
-              - Métrica: Nueva Densidad de Líneas Duplicadas
-                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
-                Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].errorThreshold }} (Cuanto menor es mejor)
-                Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.status).projectStatus.conditions[3].actualValue }}
+            Detalle del Análisis de SonarQube:
 
+            Componentes Analizados:
+
+            ${{ fromJson(steps.sonarqube_status.outputs.status).components[0].name }}:
+              - Métrica: Índice de Líneas Duplicadas en Código Nuevo
+                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).components[0].measures[0].period.value }}% (${ {fromJson(steps.sonarqube_status.outputs.status).components[0].measures[0].bestValue ? 'mejor valor' : 'peor valor'}})
+                Cantidad de Líneas Duplicadas: ${ {fromJson(steps.sonarqube_status.outputs.status).components[0].measures[0].value }}
+
+              - Métrica: Cobertura de Líneas en Código Nuevo
+                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).components[0].measures[1].period.value }}% (${ {fromJson(steps.sonarqube_status.outputs.status).components[0].measures[1].bestValue ? 'mejor valor' : 'peor valor'}})
+
+              - Métrica: Code Smells (Malos Olores)
+                Cantidad de Code Smells: ${ {fromJson(steps.sonarqube_status.outputs.status).components[0].measures[2].value }}
+
+              - Métrica: Nuevos Bugs
+                Cantidad de Bugs: ${ {fromJson(steps.sonarqube_status.outputs.status).components[0].measures[3].value }}
+
+              - Métrica: Nuevas Vulnerabilidades
+                Cantidad de Vulnerabilidades: ${ {fromJson(steps.sonarqube_status.outputs.status).components[0].measures[4].value }}
+
+            ${{ fromJson(steps.sonarqube_status.outputs.status).components[1].name }}:
+              - Métrica: Índice de Líneas Duplicadas en Código Nuevo
+                Estado: ${{ fromJson(steps.sonarqube_status.outputs.status).components[1].measures[0].period.value }}% (${ {fromJson(steps.sonarqube_status.outputs.status).components[1].measures[0].bestValue ? 'mejor valor' : 'peor valor'}})
+
+              - Métrica: Code Smells (Malos Olores)
+                Cantidad de Code Smells: ${ {fromJson(steps.sonarqube_status.outputs.status).components[1].measures[1].value }}
+
+              - Métrica: Nuevos Bugs
+                Cantidad de Bugs: ${ {fromJson(steps.sonarqube_status.outputs.status).components[1].measures[2].value }}
+
+              - Métrica: Nuevas Vulnerabilidades
+                Cantidad de Vulnerabilidades: ${ {fromJson(steps.sonarqube_status.outputs.status).components[1].measures[3].value }}
 
       - name: Check SonarQube Analysis Status
-        if: steps.sonarqube_status.outputs.status != 'undefined' && fromJson(steps.sonarqube_status.outputs.status).projectStatus.status == 'ERROR'
+        if: steps.sonarqube_status.outputs.status != 'undefined' && fromJson(steps.sonarqube_status.outputs.status).components[0].measures.length == 0
         run: exit 1
 
       - name: Block PR on SonarQube Analysis Failure
-        if: steps.sonarqube_status.outputs.status != 'undefined' && fromJson(steps.sonarqube_status.outputs.status).projectStatus.status == 'ERROR'
+        if: steps.sonarqube_status.outputs.status != 'undefined' && fromJson(steps.sonarqube_status.outputs.status).components[0].measures.length == 0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "The SonarQube analysis failed. Blocking the PR..."
+          echo "El análisis de SonarQube ha fallado. Bloqueando la PR..."
           pr_number="${{ github.event.pull_request.number }}"
           owner="${{ github.repository_owner }}"
           repo="${{ github.repository }}"
