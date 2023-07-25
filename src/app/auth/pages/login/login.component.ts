@@ -61,30 +61,7 @@ export class LoginComponent implements OnInit {
   }
 
 
-  loginOn(form: FormGroup): void {
-    this.user.usuario = this.form.get('usuario')?.value;
-    this.user.contraseña = this.form.get('contraseña')?.value;
-
-    this._authService.postLogin(this.user)
-      .subscribe({
-        next: (resp) =>
-          this.router.navigate(['./playlist'])
-
-        , error: (e) => {
-          let error = JSON.parse(JSON.stringify(e))
-          console.log(error.status);
-          if (error.status === 401 || error.status === 404) {
-            console.log('ingresa aca');
-
-            // this.showSnackbar("Usuario y/o contraseña incorrectos")
-            this.errorLogin = "Usuario y/o contraseña incorrectos";
-          }
-
-        }
-      }
-      )
-  }
-
+  
 
 
   showSnackbar(message: string) {
