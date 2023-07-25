@@ -34,7 +34,8 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           curl -X GET -u "${SONAR_TOKEN}": -o sonarqube_measures.json '${{ secrets.SONAR_HOST_URL }}/api/measures/component_tree?additionalFields=metrics&ps=500&asc=false&metricSort=new_duplicated_lines_density&s=metricPeriod&metricSortFilter=withMeasuresOnly&metricPeriodSort=1&component=${{secrets.SONAR_PROJECT_KEY}}&metricKeys=new_duplicated_lines_density,new_line_coverage,code_smells,new_bugs,new_vulnerabilities,new_security_hotspots_reviewed&strategy=leaves'
-          cat sonarqube_measures.json >> $GITHUB_ENV
+          sonarqube_measures=$(cat sonarqube_measures.json)
+          echo "sonarqube_measures=${sonarqube_measures}" >> $GITHUB_ENV
 
       - name: Comment PR
         uses: thollander/actions-comment-pull-request@v2
