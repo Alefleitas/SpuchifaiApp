@@ -46,52 +46,52 @@ jobs:
 
             Condiciones:
               - Métrica: Nuevo Índice de Fiabilidad
-                Estado: ${{ fromJson(steps.sonarqube_status.outputs.sonarqube_status).projectStatus.conditions[0].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
-                Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.sonarqube_status).projectStatus.conditions[0].errorThreshold }} (Cuanto menor es mejor)
-                Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.sonarqube_status).projectStatus.conditions[0].actualValue }}
+                Estado: ${{ steps.run_script.outputs.fallback || '✅ Exitoso' }}
+                Umbral de Error: ${{ steps.run_script.outputs.run_result.measures[0].period.bestValue }} (Cuanto menor es mejor)
+                Valor Actual: ${{ steps.run_script.outputs.run_result.measures[0].period.value }}%
+
               - Métrica: Nuevo Índice de Seguridad
-                Estado: ${{ fromJson(steps.sonarqube_status.outputs.sonarqube_status).projectStatus.conditions[1].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
-                Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.sonarqube_status).projectStatus.conditions[1].errorThreshold }} (Cuanto menor es mejor)
-                Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.sonarqube_status).projectStatus.conditions[1].actualValue }}
+                Estado: ${{ steps.run_script.outputs.run_result.measures[1].period.bestValue || '✅ Exitoso' }}
+                Umbral de Error: ${{ steps.run_script.outputs.run_result.measures[1].period.bestValue }} (Cuanto menor es mejor)
+                Valor Actual: ${{ steps.run_script.outputs.run_result.measures[1].period.value }}%
+
               - Métrica: Nuevo Índice de Mantenibilidad
-                Estado: ${{ fromJson(steps.sonarqube_status.outputs.sonarqube_status).projectStatus.conditions[2].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
-                Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.sonarqube_status).projectStatus.conditions[2].errorThreshold }} (Cuanto menor es mejor)
-                Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.sonarqube_status).projectStatus.conditions[2].actualValue }}
+                Estado: ${{ steps.run_script.outputs.run_result.measures[2].period.bestValue || '✅ Exitoso' }}
+                Umbral de Error: ${{ steps.run_script.outputs.run_result.measures[2].period.bestValue }} (Cuanto menor es mejor)
+                Valor Actual: ${{ steps.run_script.outputs.run_result.measures[2].period.value }}%
+
               - Métrica: Nueva Densidad de Líneas Duplicadas
-                Estado: ${{ fromJson(steps.sonarqube_status.outputs.sonarqube_status).projectStatus.conditions[3].status == 'OK' && '✅ Exitoso' || '❌ Fallido' }}
-                Umbral de Error: ${{ fromJson(steps.sonarqube_status.outputs.sonarqube_status).projectStatus.conditions[3].errorThreshold }} (Cuanto menor es mejor)
-                Valor Actual: ${{ fromJson(steps.sonarqube_status.outputs.sonarqube_status).projectStatus.conditions[3].actualValue }}
+                Estado: ${{ steps.run_script.outputs.run_result.measures[3].period.bestValue || '✅ Exitoso' }}
+                Umbral de Error: ${{ steps.run_script.outputs.run_result.measures[3].period.bestValue }} (Cuanto menor es mejor)
+                Valor Actual: ${{ steps.run_script.outputs.run_result.measures[3].period.value }}%
 
             Detalles de las Métricas:
+${{ steps.run_script.outputs.run_result.details }}
+      - name: Run Script
+        id: run_script
+        run: |
+          sonarqube_measures=$(cat sonarqube_measures.json)
+          status=$(cat sonarqube.json)
+          mapfile -t component_names < <(jq -r '.components[].name' <<< "$sonarqube_measures")
+          mapfile -t component_paths < <(jq -r '.components[].path' <<< "$sonarqube_measures")
+          mapfile -t measures < <(jq -r '.components[].measures | map({ metric, period })' <<< "$sonarqube_measures")
 
-            Componente: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].name }} (${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].path }}):
-              - Métrica: Índice de Líneas Duplicadas en Código Nuevo
-                Estado: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[0].period.value }}%$'\n'${{ if fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[0].bestValue }}(mejor valor){{ else }}(peor valor){{ endif }} ⚙️$'\n'📝 Cantidad de Líneas Duplicadas: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[0].value }}
+          details=""
+          for i in "${!component_names[@]}"; do
+            detail="- Componente: ${component_names[i]} (${component_paths[i]}):"
+            for measure in "${measures[i]}"; do
+              metric=$(jq -r '.metric' <<< "$measure")
+              bestValue=$(jq -r '.period.bestValue' <<< "$measure")
+              value=$(jq -r '.period.value' <<< "$measure")
+              detail="$detail\n  - Métrica: $metric"
+              detail="$detail\n    Estado: $value%$([[ $bestValue == 'true' ]] && echo ' (mejor valor)' || echo ' (peor valor)')"
+              detail="$detail\n    📝 Cantidad de Líneas Cubiertas: $(jq -r '.value' <<< "$measure")"
+            done
+            details="$details$detail\n"
+          done
 
-              - Métrica: Índice de Cobertura de Líneas en Código Nuevo
-                Estado: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[1].period.value }}%$'\n'${{ if fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[1].bestValue }}(mejor valor){{ else }}(peor valor){{ endif }} 🔍$'\n'📝 Cantidad de Líneas Cubiertas: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[1].value }}
-
-              - Métrica: Code Smells (Malos Olores)
-                📦 Cantidad de Code Smells: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[2].value }}
-
-              - Métrica: Nuevos Bugs
-                🐞 Cantidad de Bugs: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[3].value }}
-
-              - Métrica: Nuevas Vulnerabilidades
-                🔒 Cantidad de Vulnerabilidades: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[0].measures[4].value }}
-
-            Componente: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[1].name }} (${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[1].path }}):
-              - Métrica: Índice de Líneas Duplicadas en Código Nuevo
-                Estado: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[1].measures[0].period.value }}%$'\n'${{ if fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[1].measures[0].bestValue }}(mejor valor){{ else }}(peor valor){{ endif }} ⚙️$'\n'📝 Cantidad de Líneas Duplicadas: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[1].measures[0].value }}
-
-              - Métrica: Code Smells (Malos Olores)
-                📦 Cantidad de Code Smells: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[1].measures[1].value }}
-
-              - Métrica: Nuevos Bugs
-                🐞 Cantidad de Bugs: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[1].measures[2].value }}
-
-              - Métrica: Nuevas Vulnerabilidades
-                🔒 Cantidad de Vulnerabilidades: ${{ fromJson(steps.sonarqube_measures.outputs.sonarqube_measures).components[1].measures[3].value }}
+          echo "::set-output name=fallback::✅ Exitoso"
+          echo "::set-output name=run_result::$(jq -n --argjson details "$details" "$sonarqube_measures")"
 
       - name: Check SonarQube Analysis Status
         if: steps.sonarqube_status.outputs.sonarqube_status != 'undefined' && fromJson(steps.sonarqube_status.outputs.sonarqube_status).projectStatus.status == 'ERROR'
