@@ -42,10 +42,10 @@ export class LoginComponent implements OnInit {
 
     this._authService.postLogin(this.user)
       .subscribe({
-        next: (resp) =>
+        next: (resp:any) =>
           this.router.navigate(['./playlist'])
 
-        , error: (e) => {
+        , error: (e:any) => {
           let error = JSON.parse(JSON.stringify(e))
           console.log(error.status);
           if (error.status === 401 || error.status === 404) {
